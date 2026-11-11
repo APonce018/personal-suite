@@ -1,0 +1,2841 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andrea Organization Suite</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #faf7f5; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #faf5f3; }
+        ::-webkit-scrollbar-thumb { background: #f3d5d8; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #e8b4b8; }
+        
+        .notion-banner {
+            background: linear-gradient(90deg, #fce7f3 0%, #fbcfe8 50%, #f472b6 100%);
+        }
+        .notion-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(243, 213, 216, 0.6);
+            box-shadow: 0 4px 20px -2px rgba(244, 114, 182, 0.05);
+        }
+        /* Forzar mayúsculas automáticas en inputs manuscritos */
+        input[type="text"], textarea, select {
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="text-slate-700 min-h-screen flex flex-col">
+
+    <!-- TOP NOTION HEADER BANNER -->
+    <div class="w-full h-20 notion-banner relative shrink-0">
+        <div class="absolute -bottom-4 left-8 w-11 h-11 bg-white rounded-2xl shadow-md border border-pink-100 flex items-center justify-center text-pink-500 text-xl">
+            🏠
+        </div>
+    </div>
+
+    <!-- HEADER TITLE BAR -->
+    <header class="px-8 pt-6 pb-4 flex flex-wrap items-center justify-between gap-4 border-b border-pink-100/60 bg-white/50 backdrop-blur-sm">
+        <div>
+            <h1 id="section-title" class="font-extrabold text-slate-800 text-xl tracking-tight flex items-center gap-2">
+                <span>CALL CENTER / TRABAJO</span>
+                <span class="text-[11px] font-normal text-pink-400 bg-pink-50 px-2.5 py-0.5 rounded-full border border-pink-200/50">Notion Workspace</span>
+            </h1>
+            <p id="section-subtitle" class="text-xs text-slate-400 font-medium mt-0.5">Panel operativo de registros telefónicos, turnos y habilitaciones.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 bg-amber-50/80 border border-amber-200/60 px-3.5 py-1.5 rounded-2xl text-xs text-amber-900 shadow-2xs">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i>
+                <span id="current-system-time" class="font-semibold">Cargando fecha...</span>
+            </div>
+            <button onclick="openGlobalModal('callcenter')" id="header-action-btn" class="bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white text-xs font-semibold px-4 py-2 rounded-2xl shadow-sm hover:shadow-pink-200/50 transition flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Nuevo Registro</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN WRAPPER WITH SIDEBAR & CONTENT -->
+    <div class="flex-1 flex flex-col md:flex-row min-w-0">
+
+        <!-- SIDEBAR NAVIGATION -->
+        <aside id="main-sidebar" class="w-full md:w-60 p-3 space-y-2 shrink-0 border-r border-pink-100/50 bg-white/40 transition-all duration-300 relative group/sidebar">
+            <div class="flex items-center justify-between px-2 mb-2">
+                <div id="sidebar-label" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 transition-opacity duration-200">
+                    <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-pink-400"></i>
+                    <span>Espacios</span>
+                </div>
+                <button onclick="toggleSidebar()" id="btn-toggle-sidebar" class="p-1.5 text-slate-400 hover:text-pink-500 hover:bg-pink-50 rounded-xl transition flex items-center justify-center mx-auto" title="Contraer/Expandir menú">
+                    <i data-lucide="panel-left-close" id="icon-toggle-sidebar" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+            <nav class="space-y-1">
+                <button onclick="switchTab('callcenter')" id="nav-callcenter" title="Call Center" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition bg-pink-500 text-white shadow-sm shadow-pink-300/40">
+                    <i data-lucide="phone-call" class="w-4 h-4 shrink-0"></i>
+                    <span class="nav-text whitespace-nowrap">Call Center</span>
+                </button>
+                <button onclick="switchTab('agenda')" id="nav-agenda" title="Agenda Personal" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition hover:bg-pink-50 text-slate-600 hover:text-pink-600">
+                    <i data-lucide="notebook-pen" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+                    <span class="nav-text whitespace-nowrap">Agenda Personal</span>
+                </button>
+                <button onclick="switchTab('clinica')" id="nav-clinica" title="Historia Clínica" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition hover:bg-pink-50 text-slate-600 hover:text-pink-600">
+                    <i data-lucide="file-user" class="w-4 h-4 text-amber-500 shrink-0"></i>
+                    <span class="nav-text whitespace-nowrap">Historia Clínica</span>
+                </button>
+                <button onclick="switchTab('medicacion')" id="nav-medicacion" title="Control Medicación" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition hover:bg-pink-50 text-slate-600 hover:text-pink-600">
+                    <i data-lucide="pill" class="w-4 h-4 text-rose-400 shrink-0"></i>
+                    <span class="nav-text whitespace-nowrap">Control Medicación</span>
+                </button>
+                <button onclick="switchTab('calendario')" id="nav-calendario" title="Calendario" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition hover:bg-pink-50 text-slate-600 hover:text-pink-600">
+                    <i data-lucide="calendar" class="w-4 h-4 text-indigo-400 shrink-0"></i>
+                    <span class="nav-text whitespace-nowrap">Calendario</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- CONTENT CONTAINER -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+
+            <!-- 1. AGENDA PERSONAL -->
+            <div id="tab-agenda" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-3xl border border-pink-100 shadow-2xs space-y-4">
+                    <div class="flex items-center justify-between border-b border-pink-100 pb-4">
+                        <h3 class="font-bold text-slate-800 text-sm">Compromisos & Tareas Personales</h3>
+                        <button onclick="addAgendaItemPrompt()" class="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-2xs">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Nueva Tarea</span>
+                        </button>
+                    </div>
+                    <div id="agenda-items-list" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- 2. HISTORIA CLINICA (PERSONAL NOTION REPLICA) -->
+            <div id="tab-clinica" class="tab-content hidden space-y-6">
+                <div class="notion-card p-6 rounded-3xl space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-pink-100 pb-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="file-text" class="w-5 h-5 text-amber-500"></i>
+                                <h3 class="font-bold text-slate-800 text-base">HISTORIA CLÍNICA PERSONAL</h3>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-0.5">Gestión de epicrisis, consultas médicas, procedimientos y estudios clínicos.</p>
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-2xl">
+                            <button onclick="switchClinicaSubtab('epicrisis')" id="subnav-epicrisis" class="px-4 py-1.5 rounded-xl text-xs font-bold transition bg-white text-slate-800 shadow-sm">Epicrisis y Consultas</button>
+                            <button onclick="switchClinicaSubtab('estudios')" id="subnav-estudios" class="px-4 py-1.5 rounded-xl text-xs font-semibold transition text-slate-600 hover:text-slate-900">Estudios Médicos</button>
+                        </div>
+                    </div>
+
+                    <!-- SUBESPACIO 1: EPICRISIS Y CONSULTAS (TABLA NOTION) -->
+                    <div id="clinica-sub-epicrisis" class="space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <span class="px-3 py-1 bg-amber-100 text-amber-800 rounded-xl text-xs font-bold">📋 EPICRISIS</span>
+                                <input type="text" id="epicrisis-search" oninput="renderEpicrisisTable()" placeholder="Buscar en epicrisis..." class="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl w-60">
+                            </div>
+                            <button onclick="openNewEpicrisisModal()" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-2xs">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                <span>Nuevo Registro</span>
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto border border-amber-100 rounded-2xl bg-white shadow-2xs">
+                            <table class="w-full text-left border-collapse min-w-[1100px]">
+                                <thead>
+                                    <tr class="bg-amber-50/60 border-b border-amber-100 text-[11px] font-bold text-slate-600 uppercase">
+                                        <th class="p-3 w-28">Fecha</th>
+                                        <th class="p-3 w-24">Día</th>
+                                        <th class="p-3 w-24">Estado</th>
+                                        <th class="p-3 w-48">Detalle</th>
+                                        <th class="p-3">Descripción</th>
+                                        <th class="p-3 w-32">Centro Médico</th>
+                                        <th class="p-3 w-36">Profesional</th>
+                                        <th class="p-3 w-28">Tipo</th>
+                                        <th class="p-3 w-28">Servicio</th>
+                                        <th class="p-3 w-20">Horario</th>
+                                        <th class="p-3 w-24">Archivos</th>
+                                        <th class="p-3 w-28">Medicación</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="epicrisis-table-body" class="divide-y divide-amber-50 text-xs"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SUBESPACIO 2: ESTUDIOS MÉDICOS (GALERÍA DE TARJETAS NOTION) -->
+                    <div id="clinica-sub-estudios" class="space-y-4 hidden">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <span class="px-3 py-1 bg-pink-100 text-pink-800 rounded-xl text-xs font-bold">🧪 ESTUDIOS MÉDICOS</span>
+                                <input type="text" id="estudios-search" oninput="renderEstudiosGallery()" placeholder="Buscar estudio..." class="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl w-60">
+                            </div>
+                            <button onclick="openNewEstudioModal()" class="px-3.5 py-1.5 bg-pink-500 hover:bg-pink-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-2xs">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                <span>Nuevo Estudio</span>
+                            </button>
+                        </div>
+
+                        <div id="estudios-gallery-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. CALL CENTER / TRABAJO (DEFAULT VIEW) -->
+            <div id="tab-callcenter" class="tab-content space-y-4">
+                
+                <!-- 1. AVISO SUPERIOR FIJO (BANNER DESTACADO NOTA RECIENTE) -->
+                <div id="top-sticky-notice-container" class="hidden"></div>
+
+                <!-- 2. BLOQUES COMPACTOS DE JORNADA LABORAL Y NOTAS RÁPIDAS -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    
+                    <!-- FICHADOR DE JORNADA & BREAKS COMPACTOS -->
+                    <section class="notion-card rounded-2xl p-3.5 space-y-2.5">
+                        <div class="flex items-center justify-between border-b border-pink-100/60 pb-2">
+                            <div class="flex items-center gap-1.5">
+                                <i data-lucide="timer" class="w-4 h-4 text-pink-500"></i>
+                                <h3 class="text-xs font-bold text-slate-800">Control de Jornada Laboral</h3>
+                            </div>
+                            <button onclick="openTimeLogHistoryModal()" class="text-[11px] text-pink-600 hover:text-pink-800 font-semibold flex items-center gap-1">
+                                <i data-lucide="history" class="w-3 h-3"></i> Historial Fichados
+                            </button>
+                        </div>
+                        <div id="time-log-controls" class="grid grid-cols-2 gap-2 text-xs">
+                            <button onclick="recordTimeLog('Ingreso')" class="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl font-bold flex items-center justify-between px-3 transition">
+                                <span class="flex items-center gap-1"><i data-lucide="log-in" class="w-3.5 h-3.5 text-emerald-600"></i> Ingreso</span>
+                                <span id="log-time-Ingreso" class="text-[11px] font-normal text-emerald-700">--:--</span>
+                            </button>
+                            <button onclick="recordTimeLog('Egreso')" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 rounded-xl font-bold flex items-center justify-between px-3 transition">
+                                <span class="flex items-center gap-1"><i data-lucide="log-out" class="w-3.5 h-3.5 text-rose-600"></i> Egreso</span>
+                                <span id="log-time-Egreso" class="text-[11px] font-normal text-rose-700">--:--</span>
+                            </button>
+                        </div>
+
+                        <!-- BREAKS COMPACTOS -->
+                        <div class="space-y-1.5 pt-1.5 border-t border-pink-100/60">
+                            <!-- Break 1 -->
+                            <div class="px-2.5 py-1.5 bg-amber-50/60 border border-amber-200/80 rounded-xl flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="coffee" class="w-3.5 h-3.5 text-amber-600"></i>
+                                    <span class="font-bold text-amber-900">B1 (15m)</span>
+                                    <span class="text-[10px] text-amber-800/80">E: <span id="b1-in" class="font-semibold">--:--</span> | S: <span id="b1-out" class="font-semibold">--:--</span></span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span id="break-timer-1" class="text-[11px] font-extrabold px-2 py-0.5 bg-white border border-amber-200 rounded-lg text-amber-700">15:00</span>
+                                    <button onclick="toggleBreak(1, 'in')" id="btn-b1-in" class="px-2 py-0.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg shadow-2xs text-[11px] transition">Iniciar</button>
+                                    <button onclick="toggleBreak(1, 'out')" id="btn-b1-out" class="px-2 py-0.5 bg-slate-200 text-slate-500 font-semibold rounded-lg text-[11px] transition" disabled>Fin</button>
+                                </div>
+                            </div>
+
+                            <!-- Break 2 -->
+                            <div class="px-2.5 py-1.5 bg-amber-50/60 border border-amber-200/80 rounded-xl flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="cup-soda" class="w-3.5 h-3.5 text-amber-600"></i>
+                                    <span class="font-bold text-amber-900">B2 (15m)</span>
+                                    <span class="text-[10px] text-amber-800/80">E: <span id="b2-in" class="font-semibold">--:--</span> | S: <span id="b2-out" class="font-semibold">--:--</span></span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span id="break-timer-2" class="text-[11px] font-extrabold px-2 py-0.5 bg-white border border-amber-200 rounded-lg text-amber-700">15:00</span>
+                                    <button onclick="toggleBreak(2, 'in')" id="btn-b2-in" class="px-2 py-0.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg shadow-2xs text-[11px] transition">Iniciar</button>
+                                    <button onclick="toggleBreak(2, 'out')" id="btn-b2-out" class="px-2 py-0.5 bg-slate-200 text-slate-500 font-semibold rounded-lg text-[11px] transition" disabled>Fin</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- NOTAS DEL DIA Y AVISOS COMPACTOS -->
+                    <section class="notion-card rounded-2xl p-3.5 space-y-2 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between border-b border-pink-100/60 pb-2">
+                                <div class="flex items-center gap-1.5">
+                                    <i data-lucide="sticky-note" class="w-4 h-4 text-amber-500"></i>
+                                    <h3 class="text-xs font-bold text-slate-800">Notas Rápidas del Día / Avisos</h3>
+                                </div>
+                                <button onclick="openDailyNotesHistoryModal()" class="text-[11px] text-amber-600 hover:text-amber-800 font-semibold flex items-center gap-1">
+                                    <i data-lucide="history" class="w-3 h-3"></i> Historial Notas
+                                </button>
+                            </div>
+                            <div class="flex gap-2 mt-2">
+                                <input type="text" id="daily-note-input" placeholder="EJ: EL HOSPITAL DE UNQUILLO CANCELÓ SUS AGENDAS..." class="flex-1 px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-amber-300">
+                                <button onclick="addDailyNote()" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-xl shadow-2xs transition shrink-0">Guardar</button>
+                            </div>
+                        </div>
+                        <div id="latest-daily-notes-list" class="space-y-1 mt-1 max-h-28 overflow-y-auto"></div>
+                    </section>
+
+                </div>
+
+                <!-- 3. PLATAFORMAS Y ENLACES DIARIOS -->
+                <section class="notion-card rounded-3xl overflow-hidden">
+                    <div class="px-5 py-3 bg-pink-50/40 border-b border-pink-100/60 flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-[11px] font-bold text-pink-600 uppercase tracking-wider">
+                            <i data-lucide="external-link" class="w-4 h-4 text-pink-400"></i>
+                            <span>Plataformas y Enlaces Diarios</span>
+                        </div>
+                        <button onclick="togglePlatformsSection()" id="btn-toggle-platforms" class="text-xs font-semibold text-pink-500 hover:text-pink-700 flex items-center gap-1">
+                            <span>Ocultar enlaces</span>
+                            <i data-lucide="chevron-up" id="icon-toggle-platforms" class="w-4 h-4 transition-transform"></i>
+                        </button>
+                    </div>
+                    <div id="platforms-content" class="p-4 transition-all duration-300">
+                        <div class="flex flex-wrap gap-2.5">
+                            <a href="https://cidi.cba.gov.ar" target="_blank" class="px-3.5 py-2 bg-pink-50/80 hover:bg-pink-100/80 text-pink-700 border border-pink-200/60 rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition">CIDI <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></a>
+                            <a href="https://salud.cba.gov.ar" target="_blank" class="px-3.5 py-2 bg-pink-50/80 hover:bg-pink-100/80 text-pink-700 border border-pink-200/60 rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition">Sisalud <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></a>
+                            <a href="https://nosco.cba.gov.ar" target="_blank" class="px-3.5 py-2 bg-pink-50/80 hover:bg-pink-100/80 text-pink-700 border border-pink-200/60 rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition">Nosco <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></a>
+                            <a href="#" target="_blank" class="px-3.5 py-2 bg-pink-50/80 hover:bg-pink-100/80 text-pink-700 border border-pink-200/60 rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition">Nosis <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></a>
+                            <a href="#" target="_blank" class="px-3.5 py-2 bg-pink-50/80 hover:bg-pink-100/80 text-pink-700 border border-pink-200/60 rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition">Slack <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></a>
+                            <button class="px-3.5 py-2 bg-slate-100/80 hover:bg-slate-200/80 text-slate-700 rounded-2xl text-xs font-semibold transition">Guía de Servicios</button>
+                            <button class="px-3.5 py-2 bg-slate-100/80 hover:bg-slate-200/80 text-slate-700 rounded-2xl text-xs font-semibold transition">Guía de Estudios</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- METRICS COUNTERS -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="notion-card p-5 rounded-3xl flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Llamadas</p>
+                            <div class="flex items-baseline gap-2 mt-1">
+                                <h3 id="dash-calls-today" class="text-2xl font-bold text-pink-500">0</h3>
+                                <span id="dash-calls-total" class="text-xs font-semibold text-pink-700/80 bg-pink-50 px-2 py-0.5 rounded-full border border-pink-200/50">Total: 0</span>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 rounded-2xl bg-pink-100/80 text-pink-500 flex items-center justify-center">
+                            <i data-lucide="phone" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="notion-card p-5 rounded-3xl flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Turnos Otorgados</p>
+                            <div class="flex items-baseline gap-2 mt-1">
+                                <h3 id="dash-assigned-today" class="text-2xl font-bold text-emerald-500">0</h3>
+                                <span id="dash-assigned-total" class="text-xs font-semibold text-emerald-700/80 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/50">Total: 0</span>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-100/80 text-emerald-600 flex items-center justify-center">
+                            <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="notion-card p-5 rounded-3xl flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pacientes Registrados</p>
+                            <div class="flex items-baseline gap-2 mt-1">
+                                <h3 id="dash-patients-today" class="text-2xl font-bold text-amber-500">0</h3>
+                                <span id="dash-patients-total" class="text-xs font-semibold text-amber-700/80 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/50">Total: 0</span>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 rounded-2xl bg-amber-100/80 text-amber-600 flex items-center justify-center">
+                            <i data-lucide="users" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="notion-card p-5 rounded-3xl flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Agendas Habilitadas</p>
+                            <div class="flex items-baseline gap-2 mt-1">
+                                <h3 id="dash-hab-today" class="text-2xl font-bold text-indigo-500">0</h3>
+                                <span id="dash-hab-total" class="text-xs font-semibold text-indigo-700/80 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/50">Total: 0</span>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-100/80 text-indigo-500 flex items-center justify-center">
+                            <i data-lucide="clock-4" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 1: REGISTRO DE LLAMADAS -->
+                <section class="notion-card rounded-3xl overflow-hidden">
+                    <div class="p-5 bg-pink-50/30 border-b border-pink-100/60 flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="phone-call" class="w-5 h-5 text-pink-500"></i>
+                                <h2 class="text-base font-bold text-slate-800">Registro de Llamadas y Solicitudes Activas</h2>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-0.5">Las llamadas activas permanecen aquí. Puedes editar los datos directamente o archivarlas al finalizar.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openHistoryModal('calls')" class="px-3.5 py-2 bg-white hover:bg-pink-50 text-pink-600 border border-pink-200/70 rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition shadow-2xs">
+                                <i data-lucide="history" class="w-4 h-4"></i>
+                                <span>Historial Completo</span>
+                            </button>
+                            <button onclick="openGlobalModal('callcenter')" class="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                <span>Registrar Llamada</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-pink-50/20 border-b border-pink-100/50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                    <th class="p-4 w-48">Teléfono</th>
+                                    <th class="p-4">Solicitudes</th>
+                                    <th class="p-4 w-44">Estado de Llamada</th>
+                                    <th class="p-4 w-24 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="calls-table-body" class="divide-y divide-pink-50 text-xs"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SPLIT ROW: TURNOS ASIGNADOS & HABILITACION DE AGENDAS -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                    <!-- SECTION 2: TURNOS ASIGNADOS -->
+                    <section class="notion-card rounded-3xl overflow-hidden flex flex-col">
+                        <div class="p-4 sm:p-5 bg-emerald-50/40 border-b border-emerald-100/60 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="calendar-check" class="w-5 h-5 text-emerald-500"></i>
+                                <h2 class="text-base font-bold text-slate-800">Turnos Asignados</h2>
+                                <span id="assigned-count-badge" class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded-full">0 turnos hoy</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="toggleSectionCollapse('assigned-table-container', 'icon-toggle-assigned')" class="text-slate-400 hover:text-emerald-700 p-1.5 rounded-xl transition" title="Minimizar / Mostrar Sección">
+                                    <i data-lucide="chevron-up" id="icon-toggle-assigned" class="w-4 h-4 transition-transform"></i>
+                                </button>
+                                <button onclick="openHistoryModal('assigned')" class="px-3 py-1.5 bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-200/70 rounded-2xl text-xs font-semibold flex items-center gap-1 transition shadow-2xs">
+                                    <i data-lucide="history" class="w-3.5 h-3.5"></i>
+                                    <span>Historial</span>
+                                </button>
+                                <button onclick="openAssignedModal()" class="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-semibold flex items-center gap-1 transition shadow-sm">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                                    <span>+ Asignar Turno</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="assigned-table-container" class="overflow-x-auto flex-1 transition-all duration-300">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-emerald-50/20 border-b border-emerald-100/50 text-[11px] font-bold text-slate-500 uppercase">
+                                        <th class="p-3">Paciente</th>
+                                        <th class="p-3">Contacto</th>
+                                        <th class="p-3">Fecha & Hora</th>
+                                        <th class="p-3">Hospital & Servicio</th>
+                                        <th class="p-3">Profesional</th>
+                                        <th class="p-3 text-right">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assigned-table-body" class="divide-y divide-emerald-50 text-xs"></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- SECTION 3: HABILITACION DE AGENDAS -->
+                    <section class="notion-card rounded-3xl overflow-hidden flex flex-col">
+                        <div class="p-4 sm:p-5 bg-indigo-50/40 border-b border-indigo-100/60 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="clock-4" class="w-5 h-5 text-indigo-400"></i>
+                                <h2 class="text-base font-bold text-slate-800">Habilitación de Agendas</h2>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="toggleSectionCollapse('habilitacion-table-container', 'icon-toggle-hab')" class="text-slate-400 hover:text-indigo-700 p-1.5 rounded-xl transition" title="Minimizar / Mostrar Sección">
+                                    <i data-lucide="chevron-up" id="icon-toggle-hab" class="w-4 h-4 transition-transform"></i>
+                                </button>
+                                <button onclick="openHistoryModal('habilitacion')" class="px-3 py-1.5 bg-white hover:bg-indigo-50 text-indigo-600 border border-indigo-200/70 rounded-2xl text-xs font-semibold flex items-center gap-1 transition shadow-2xs">
+                                    <i data-lucide="history" class="w-3.5 h-3.5"></i>
+                                    <span>Historial</span>
+                                </button>
+                                <button onclick="openHabilitacionModal()" class="px-3.5 py-1.5 bg-indigo-400 hover:bg-indigo-500 text-white rounded-2xl text-xs font-semibold flex items-center gap-1 transition shadow-sm">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                                    <span>+ Registrar Apertura</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="habilitacion-table-container" class="overflow-x-auto flex-1 transition-all duration-300">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-indigo-50/20 border-b border-indigo-100/50 text-[11px] font-bold text-slate-500 uppercase">
+                                        <th class="p-3">Servicio / Código</th>
+                                        <th class="p-3">Hospital</th>
+                                        <th class="p-3">Doctor / Profesional</th>
+                                        <th class="p-3">Fecha & Hora</th>
+                                        <th class="p-3">Mes</th>
+                                        <th class="p-3 text-right">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="habilitacion-table-body" class="divide-y divide-indigo-50 text-xs"></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+
+            <!-- 4. CONTROL MEDICACION -->
+            <div id="tab-medicacion" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-3xl border border-pink-100 shadow-2xs space-y-4">
+                    <div class="flex items-center justify-between border-b border-pink-100 pb-4">
+                        <h3 class="font-bold text-slate-800 text-sm">Control & Esquemas de Medicación</h3>
+                        <button onclick="addMedicationPrompt()" class="px-3.5 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-2xs">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Nuevo Medicamento</span>
+                        </button>
+                    </div>
+                    <div id="medication-items-list" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- 5. CALENDARIO OPERATIVO -->
+            <div id="tab-calendario" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-3xl border border-pink-100 shadow-2xs space-y-4">
+                    <h3 class="font-bold text-slate-800 text-sm border-b border-pink-100 pb-4">Calendario de Eventos & Coberturas</h3>
+                    <div class="p-8 text-center border-2 border-dashed border-pink-200/70 rounded-2xl text-slate-400">
+                        <i data-lucide="calendar" class="w-10 h-10 mx-auto mb-2 text-pink-300"></i>
+                        <p class="text-xs font-medium">Vista mensual de turnos y coberturas sincronizadas.</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- GLOBAL FORM MODAL -->
+    <div id="global-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden transition-all">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <div>
+                    <h3 id="modal-title" class="text-lg font-bold text-slate-800">Nuevo Registro General</h3>
+                    <p class="text-xs text-slate-500">Completa los campos requeridos para guardar en el sistema.</p>
+                </div>
+                <button onclick="closeGlobalModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-200/60 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="global-form" onsubmit="handleGlobalSubmit(event)" class="flex-1 overflow-y-auto p-6 space-y-6">
+                <input type="hidden" id="form-module" value="callcenter">
+
+                <!-- CALL CENTER FIELDS -->
+                <div id="callcenter-fields" class="space-y-6">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Teléfono de Contacto</label>
+                        <input type="text" id="call-phone" placeholder="Ej: 3513465645" class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition">
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Solicitudes Telefónicas</h4>
+                        <button type="button" onclick="addSolicitudRow()" class="text-xs font-semibold text-pink-600 hover:text-pink-800 bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-lg border border-pink-200 transition flex items-center gap-1">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                            <span>Agregar solicitud</span>
+                        </button>
+                    </div>
+
+                    <div id="call-requests-list" class="space-y-4"></div>
+                </div>
+
+                <!-- ASSIGNED TURNS FIELDS -->
+                <div id="assigned-fields" class="hidden space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre Paciente</label>
+                            <input type="text" id="ass-patient" placeholder="Ej: María Pérez" class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">DNI / Documento</label>
+                            <input type="text" id="ass-dni" placeholder="Ej: 31234567" class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Teléfono</label>
+                            <input type="text" id="ass-phone" placeholder="Ej: 3519876543" class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Turnos a Otorgar (Asignación Múltiple)</h4>
+                        <button type="button" onclick="addAssignedRow()" class="text-xs font-semibold text-emerald-600 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-200 transition flex items-center gap-1">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                            <span>Agregar otro turno</span>
+                        </button>
+                    </div>
+
+                    <div id="assigned-rows-list" class="space-y-3"></div>
+                </div>
+
+                <!-- HABILITACION DE AGENDAS FIELDS -->
+                <div id="habilitacion-fields" class="hidden space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Servicio / Especialidad (A-Z)</label>
+                            <select id="hab-servicio" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Código de Apertura (Opcional)</label>
+                            <input type="text" id="hab-codigo" placeholder="Ej: GIN-01" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Hospital / Centro Destino</label>
+                            <select id="hab-hospital" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Doctor / Profesional</label>
+                            <input type="text" id="hab-doctor" placeholder="Ej: Dra. Cosimi Agostina" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha Habilitación</label>
+                            <input type="date" id="hab-fecha" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Horario</label>
+                            <input type="text" id="hab-hora" placeholder="Ej: 10:30 hs" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Mes Habilitado</label>
+                            <select id="hab-mes" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                                <option value="Enero">Enero</option>
+                                <option value="Febrero">Febrero</option>
+                                <option value="Marzo">Marzo</option>
+                                <option value="Abril">Abril</option>
+                                <option value="Mayo">Mayo</option>
+                                <option value="Junio">Junio</option>
+                                <option value="Julio">Julio</option>
+                                <option value="Agosto">Agosto</option>
+                                <option value="Septiembre">Septiembre</option>
+                                <option value="Octubre">Octubre</option>
+                                <option value="Noviembre" selected>Noviembre</option>
+                                <option value="Diciembre">Diciembre</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Observaciones</label>
+                        <input type="text" id="hab-obs" placeholder="Días de atención, condiciones..." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-200 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeGlobalModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition">Cancelar</button>
+                    <button type="submit" class="px-6 py-2.5 bg-pink-500 hover:bg-pink-600 text-white rounded-xl text-xs font-semibold transition shadow-md">Guardar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EPICRISIS ITEM MODAL -->
+    <div id="epicrisis-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col">
+            <div class="px-6 py-4 bg-amber-50 border-b border-amber-200 flex items-center justify-between">
+                <h3 id="epicrisis-modal-title" class="text-base font-bold text-slate-800">Nuevo Registro de Epicrisis</h3>
+                <button onclick="closeEpicrisisModal()" class="text-slate-400 hover:text-slate-600 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="saveEpicrisisForm(event)" class="p-6 space-y-4">
+                <input type="hidden" id="epicrisis-edit-id" value="">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha</label>
+                        <input type="date" id="epi-fecha" required class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Estado</label>
+                        <select id="epi-estado" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-semibold">
+                            <option value="FINALIZADO">FINALIZADO</option>
+                            <option value="PENDIENTE">PENDIENTE</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Horario</label>
+                        <input type="text" id="epi-horario" placeholder="EJ: 15:45 HS" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Detalle (Asunto)</label>
+                        <input type="text" id="epi-detalle" placeholder="EJ: CONTROL CON GINECOLOGA" required class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Centro Médico</label>
+                        <select id="epi-centro" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl"></select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Profesional</label>
+                        <input type="text" id="epi-profesional" placeholder="EJ: FERRARI GABRIELA" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tipo</label>
+                        <input type="text" id="epi-tipo" placeholder="EJ: CONSULTA MEDICA" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Servicio</label>
+                        <select id="epi-servicio" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl"></select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Descripción Detallada / Notas</label>
+                    <textarea id="epi-descripcion" placeholder="Resumen de consulta, evaluaciones, indicaciones..." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl h-24"></textarea>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Archivos / PDF (Opcional)</label>
+                        <input type="text" id="epi-archivo" placeholder="EJ: INFORME.PDF" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Control de Medicación (Opcional)</label>
+                        <input type="text" id="epi-medicacion" placeholder="EJ: METRERGINA 00.00HS" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-slate-200 flex justify-end gap-3">
+                    <button type="button" onclick="closeEpicrisisModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold shadow-md">Guardar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ESTUDIO MÉDICO ITEM MODAL -->
+    <div id="estudio-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col">
+            <div class="px-6 py-4 bg-pink-50 border-b border-pink-200 flex items-center justify-between">
+                <h3 id="estudio-modal-title" class="text-base font-bold text-slate-800">Nuevo Estudio Médico</h3>
+                <button onclick="closeEstudioModal()" class="text-slate-400 hover:text-slate-600 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="saveEstudioForm(event)" class="p-6 space-y-4">
+                <input type="hidden" id="estudio-edit-id" value="">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Título del Estudio</label>
+                        <input type="text" id="est-titulo" placeholder="EJ: ECOGRAFÍA TRANSVAGINAL" required class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Color de Tarjeta (Notion)</label>
+                        <select id="est-color" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-semibold">
+                            <option value="amber">💛 Amarillo (Ecografía / Ginecología)</option>
+                            <option value="purple">💜 Morado (Cardiología / Electro)</option>
+                            <option value="red">❤️ Rojo (Laboratorio / Química / Hemograma)</option>
+                            <option value="indigo">💙 Índigo (General)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha</label>
+                        <input type="date" id="est-fecha" required class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Motivo</label>
+                        <input type="text" id="est-motivo" placeholder="EJ: PREQUIRÚRGICO" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Centro / Hospital</label>
+                        <select id="est-hospital" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl"></select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Archivo PDF Asociado</label>
+                        <input type="text" id="est-pdf" placeholder="EJ: INFORME ECO TRANSVAGINAL.PDF" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Especialidad / Servicio</label>
+                        <select id="est-servicio" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl"></select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Informe / Resultados y Conclusiones</label>
+                    <textarea id="est-conclusiones" placeholder="Detalle de valores obtenidos, conclusiones médicas..." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl h-28"></textarea>
+                </div>
+                <div class="pt-4 border-t border-slate-200 flex justify-end gap-3">
+                    <button type="button" onclick="closeEstudioModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-xl text-xs font-semibold shadow-md">Guardar Estudio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- HISTORY CONSULTATION & EDITING MODAL -->
+    <div id="history-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <div>
+                    <h3 id="history-title" class="text-base font-bold text-slate-800">Historial de Registros</h3>
+                    <p class="text-xs text-slate-500">Consulta y edita en tiempo real cualquier equivocación en los registros guardados.</p>
+                </div>
+                <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-200 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-4 bg-slate-50/50 border-b border-slate-200">
+                <input type="text" id="history-search-input" oninput="filterHistory()" placeholder="Buscar en historial por médico, paciente, teléfono, servicio u hospital..." class="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/20">
+            </div>
+            <div class="flex-1 overflow-y-auto p-6">
+                <div id="history-content-list" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <!-- MAIN SCRIPT -->
+    <script>
+        const listaServicios = [
+            "ALERGOLOGIA", "ANESTESIOLOGIA", "CARDIOLOGIA", "CIRUGIA", 
+            "CLINICA MEDICA", "DERMATOLOGIA", "DIABETOLOGIA", "ENDOCRINOLOGIA", 
+            "FISIOTERAPIA", "FLEBOLOGIA", "GASTROENTEROLOGIA", "GINECOLOGIA", 
+            "HEMATOLOGIA", "HEPATOLOGIA", "INFECTOLOGIA", "JUNTA DE DISCAPACIDAD", 
+            "MEDICINA FAMILIAR", "MEDICINA INCLUSIVA", "MEDICINA LEGAL", "NEFROLOGIA", 
+            "NEUMONOLOGIA", "NEUROCIRUGIA", "NEUROLOGIA", "NUTRICION", 
+            "OBSTETRICIA", "OFTALMOLOGIA", "ONCOLOGIA", "ORL", 
+            "PEDIATRIA", "PROCTOLOGIA", "PSICOLOGIA", "PSICOPEDAGOGIA", 
+            "PSIQUIATRIA", "REHABILITACION", "REUMATOLOGIA", "SALUD MENTAL ADMISION", 
+            "SERVICIO SOCIAL", "TRAUMATOLOGIA", "UROLOGIA", "VASCULAR PERIFERICO"
+        ].sort();
+
+        const listaHospitales = [
+            "CÓRDOBA", "ELPIDIO TORRES", "EVA PERON", "FLORENCIO DIAZ", "MATERNIDAD", "MISERICORDIA", 
+            "NEONATAL", "NEUROPSIQUIATRICO", "NIÑOS", "ONCOLOGICO", "PEDIATRICO (CASACUNA)", "RAWSON", 
+            "SAN ROQUE NUEVO", "SAN ROQUE VIEJO", "TRANSITO", "ARTURO ILIA - (Alta gracia)", 
+            "AURELIO CRESPO - (Cruz del Eje)", "BELLODI - (Mina Clavero)", "CALERA", "DOMINGO FUNES (Punilla)", 
+            "EMILIO VIDAL ABAL (Oliva)", "ERNESTO ROMAGOSA (Dean Funes)", "EVA PERON (Calamuchita)", 
+            "ITURRASPE (San Francisco)", "JOSÉ A CEBALLOS (Bell ville)", "LA CARLOTA", "PASTEUR (Villa María)", 
+            "PEDRO VELLA (Corral de Bustos)", "RAMON CARCANO (Laboulaye)", "RENEE FAVALORO (Huinca Renanco)", 
+            "RÍO PRIMERO", "RÍO TERCERO", "SAN ANTONIO DE PADUA (Rio cuarto)", "SAN VICENTE DE PAUL (Villa del rosario)", 
+            "SJ DE LA DORMIDA", "URRUTIA (Unquillo)", "VICENTE AGUERO (Jesús María)", "VILLA DOLORES", "ZONAL (Oliva)",
+            "CLÍNICA DEL SOL", "LACE CERRO", "HOSPITAL PRIVADO - CERRO"
+        ];
+
+        const hospitalLinks = {
+            "CÓRDOBA": "https://cordoba.cba.gov.ar/cas/login?service=https%3A%2F%2Fcordoba.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "ELPIDIO TORRES": "https://elpidiotorres.cba.gov.ar/cas/login?service=https%3A%2F%2Felpidiotorres.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "EVA PERON": "https://hospitalevaperon.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalevaperon.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "FLORENCIO DIAZ": "https://florenciodiaz.cba.gov.ar/cas/login?service=https%3A%2F%2Fflorenciodiaz.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "MATERNIDAD": "https://maternidad.cba.gov.ar/cas/login?service=https%3A%2F%2Fmaternidad.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "MISERICORDIA": "https://misericordia.cba.gov.ar/cas/login?service=https%3A%2F%2Fmisericordia.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "NEONATAL": "https://neonatal.cba.gov.ar/cas/login?service=https%3A%2F%2Fneonatal.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "NEUROPSIQUIATRICO": "https://neuro.cba.gov.ar/cas/login?service=https%3A%2F%2Fneuro.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "NIÑOS": "https://ninos.cba.gov.ar/cas/login?service=https%3A%2F%2Fninos.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "ONCOLOGICO": "https://oncologico.cba.gov.ar/cas/login?service=https%3A%2F%2Foncologico.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "PEDIATRICO (CASACUNA)": "https://pediatrico.cba.gov.ar/cas/login?service=https%3A%2F%2Fpediatrico.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "RAWSON": "https://rawson.cba.gov.ar/cas/login?service=https%3A%2F%2Frawson.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "SAN ROQUE NUEVO": "https://nuevosanroque.cba.gov.ar/cas/login?service=https%3A%2F%2Fnuevosanroque.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "SAN ROQUE VIEJO": "https://hospitalsanroqueviejo.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalsanroqueviejo.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "TRANSITO": "https://transitocaceres.cba.gov.ar/cas/login?service=https%3A%2F%2Ftransitocaceres.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "ARTURO ILIA - (Alta gracia)": "https://illiaaltagracia.cba.gov.ar/cas/login?service=https%3A%2F%2Filliaaltagracia.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "AURELIO CRESPO - (Cruz del Eje)": "https://aureliocrespo.cba.gov.ar/cas/login?service=https%3A%2F%2Faureliocrespo.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "BELLODI - (Mina Clavero)": "https://hospitalminaclavero.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalminaclavero.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "CALERA": "https://illiacalera.cba.gov.ar/cas/login?service=https%3A%2F%2Filliacalera.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "DOMINGO FUNES (Punilla)": "https://hospitaldomingofunes.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitaldomingofunes.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "EMILIO VIDAL ABAL (Oliva)": "https://vidalabal.cba.gov.ar/cas/login?service=https%3A%2F%2Fvidalabal.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "ERNESTO ROMAGOSA (Dean Funes)": "https://hospitaldeanfunes.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitaldeanfunes.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "EVA PERON (Calamuchita)": "https://hospitalsantarosacalamuchita.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalsantarosacalamuchita.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "ITURRASPE (San Francisco)": "https://iturraspe.cba.gov.ar/cas/login?service=https%3A%2F%2Fiturraspe.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "JOSÉ A CEBALLOS (Bell ville)": "https://hospitalbellville.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalbellville.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "LA CARLOTA": "https://hospitallacarlota.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitallacarlota.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "PASTEUR (Villa María)": "https://hospitalvillamaria.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalvillamaria.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "PEDRO VELLA (Corral de Bustos)": "https://hospitalcorraldebustos.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalcorraldebustos.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "RAMON CARCANO (Laboulaye)": "https://hospitallaboulaye.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitallaboulaye.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "RENEE FAVALORO (Huinca Renanco)": "https://hospitalhuincarenanco.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalhuincarenanco.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "RÍO PRIMERO": "https://hospitalsantarosarioprimero.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalsantarosarioprimero.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "RÍO TERCERO": "https://hospitalriotercero.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalriotercero.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "SAN ANTONIO DE PADUA (Rio cuarto)": "https://rioiv.cba.gov.ar/cas/login?service=https%3A%2F%2Frioiv.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "SAN VICENTE DE PAUL (Villa del rosario)": "https://hospitalvilladelrosario.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalvilladelrosario.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "SJ DE LA DORMIDA": "https://hospitalsanjosedeladormida.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalsanjosedeladormida.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "URRUTIA (Unquillo)": "https://hospitalunquillo.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalunquillo.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "VICENTE AGUERO (Jesús María)": "https://hospitaljesusmaria.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitaljesusmaria.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "VILLA DOLORES": "https://hospitalvilladolores.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalvilladolores.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas",
+            "ZONAL (Oliva)": "https://hospitalzonaloliva.cba.gov.ar/cas/login?service=https%3A%2F%2Fhospitalzonaloliva.cba.gov.ar%2F2FehHIS-ui%2F2flogin%2F2fcas"
+        };
+
+        const todayInitialStr = new Date().toLocaleDateString('es-AR');
+
+        let appState = {
+            calls: [
+                {
+                    id: 1,
+                    phone: "3513465645",
+                    status: "Llamada en curso",
+                    fechaHora: `${todayInitialStr} - 08:16 hs`,
+                    requests: [
+                        {
+                            tipo: "Consulta",
+                            grupoEtario: "Adulto",
+                            servicios: [
+                                { nombre: "GASTROENTEROLOGIA", doctor: "MARTINEZ", dni: "31234567" },
+                                { nombre: "MEDICINA FAMILIAR", doctor: "", dni: "" },
+                                { nombre: "MEDICINA INCLUSIVA", doctor: "", dni: "" }
+                            ],
+                            hospital: "NEONATAL",
+                            obs: "PACIENTE CONSULTA POR TURNOS DE CONTROL ANUAL."
+                        }
+                    ]
+                }
+            ],
+            assigned: [
+                {
+                    id: 101,
+                    patient: "MARÍA PÉREZ",
+                    grupoEtario: "Adulto",
+                    dni: "31234567",
+                    phone: "3519876543",
+                    fechaHora: `${todayInitialStr} 10:30 hs`,
+                    hospital: "SAN ROQUE NUEVO",
+                    servicio: "GINECOLOGIA",
+                    doctor: "DRA. COSIMI"
+                }
+            ],
+            habilitacion: [
+                {
+                    id: 201,
+                    codigo: "GIN-01",
+                    servicio: "GINECOLOGIA",
+                    hospital: "SAN ROQUE NUEVO",
+                    doctor: "COSIMI",
+                    fechaHora: `${todayInitialStr} 16:43 hs`,
+                    mes: "Noviembre",
+                    obs: "AGENDA HABILITADA"
+                }
+            ],
+            timeLogs: [],
+            dailyNotes: [
+                { id: 999, text: "EL HOSPITAL DE UNQUILLO SUSPENDIO LAS AGENDAS", fechaHora: `${todayInitialStr} 11:44 p. m.` }
+            ],
+            breaksState: {
+                1: { inTime: '--:--', outTime: '--:--', secondsLeft: 900, timerId: null, active: false },
+                2: { inTime: '--:--', outTime: '--:--', secondsLeft: 900, timerId: null, active: false }
+            },
+            agendaItems: ["Revisión de correos de la mañana", "Confirmar horarios guardia San Roque"],
+            epicrisis: [
+                {
+                    id: 1,
+                    fecha: new Date().toISOString().split('T')[0],
+                    dia: "MIÉRCOLES",
+                    estado: "FINALIZADO",
+                    detalle: "Procedimiento quirúrgico Histeroscopia",
+                    descripcion: "PREPARACIÓN:\n- Ayuno de sólidos desde las 00:00 del día anterior.\n- Presentarse a las 9hs en admisión. No sacar número.\n- Baño quirúrgico por la mañana antes de asistir con jabón pervinox.\n- Se puede tomar agua/té hasta 2 horas antes de la internación.\n- Llevar estudios (ecografías y laboratorio).\n- Llevar consentimiento de Histeroscopia.\n- Llevar copia del DNI y credencial.\n- Llevar DIU.\n- Asistir con un acompañante.\n\nNO OLVIDAR:\n- Pedir certificados.\n- Consultar cuidado post procedimientos.\n- Consultar estado de malformación arteriovenosa.",
+                    centro: "CLÍNICA DEL SOL",
+                    profesional: "COSIMI Agostina",
+                    tipo: "Procedimiento ambulatorio",
+                    servicio: "GINECOLOGÍA",
+                    horario: "9:00hs",
+                    archivo: "CERTIFICADO MÉDICO.PDF",
+                    medicacion: ""
+                }
+            ],
+            estudios: [
+                {
+                    id: 101,
+                    titulo: "Ecografía Doppler Transvaginal",
+                    fecha: new Date().toISOString().split('T')[0],
+                    motivo: "Ecografías previas sin cambios",
+                    hospital: "CLÍNICA DEL SOL",
+                    servicio: "GINECOLOGÍA",
+                    color: "amber",
+                    pdf: "INFORME ECO TRANSVAGINAL.PDF",
+                    conclusiones: "Útero en A.V.F. de forma y tamaño normal..."
+                }
+            ],
+            medications: [{ name: "Enalapril 10mg", schedule: "Cada 12 horas" }]
+        };
+
+        let editingCallId = null;
+        let editingHistoryItem = null; // { type: 'calls'|'assigned'|'habilitacion', id: ... }
+
+        // Utilidad para extraer la fecha simple (YYYY-MM-DD o DD/MM/YYYY) y verificar si es HOY
+        function isDateToday(dateStr) {
+            if (!dateStr) return false;
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            
+            const todayDash = `${year}-${month}-${day}`;
+            const todaySlash = `${day}/${month}/${year}`;
+            const todaySlashShort = `${parseInt(day)}/${parseInt(month)}/${year}`;
+
+            const cleanStr = String(dateStr).trim();
+
+            if (cleanStr.includes(todayDash) || cleanStr.includes(todaySlash) || cleanStr.includes(todaySlashShort)) {
+                return true;
+            }
+
+            // Si contiene espacios o guiones de tiempo, extraemos la parte inicial
+            const firstToken = cleanStr.split(' ')[0].split('T')[0];
+            if (firstToken === todayDash || firstToken === todaySlash) return true;
+
+            // Formato DD/MM/YYYY
+            const dateParts = firstToken.split('/');
+            if (dateParts.length === 3) {
+                const pDay = dateParts[0].padStart(2, '0');
+                const pMonth = dateParts[1].padStart(2, '0');
+                const pYear = dateParts[2].length === 2 ? `20${dateParts[2]}` : dateParts[2];
+                return `${pYear}-${pMonth}-${pDay}` === todayDash;
+            }
+
+            return false;
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('andrea_suite_state_v6');
+            if (saved) {
+                try { appState = JSON.parse(saved); } catch (e) {}
+            }
+            if (!appState.timeLogs) appState.timeLogs = [];
+            if (!appState.dailyNotes) appState.dailyNotes = [];
+            if (!appState.epicrisis) appState.epicrisis = [];
+            if (!appState.estudios) appState.estudios = [];
+            if (!appState.calls) appState.calls = [];
+            if (!appState.assigned) appState.assigned = [];
+            if (!appState.habilitacion) appState.habilitacion = [];
+        }
+
+        function saveState() {
+            localStorage.setItem('andrea_suite_state_v6', JSON.stringify(appState));
+        }
+
+        function recordTimeLog(type) {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('es-AR');
+            const timeStr = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            const existingIndex = appState.timeLogs.findIndex(l => l.date === dateStr && l.type === type);
+            if (existingIndex >= 0) {
+                appState.timeLogs[existingIndex].time = timeStr;
+            } else {
+                appState.timeLogs.unshift({ id: Date.now(), date: dateStr, type: type, time: timeStr });
+            }
+            saveState();
+            renderTimeLogWidget();
+            showToast(`Fichado de ${type} registrado (${timeStr})`);
+        }
+
+        function renderTimeLogWidget() {
+            const todayStr = new Date().toLocaleDateString('es-AR');
+            ['Ingreso', 'Egreso'].forEach(t => {
+                const el = document.getElementById(`log-time-${t}`);
+                if (el) {
+                    const log = appState.timeLogs.find(l => l.date === todayStr && l.type === t);
+                    el.innerText = log ? log.time : '--:--';
+                }
+            });
+            renderBreaksWidget();
+        }
+
+        function toggleBreak(breakNum, action) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const bState = appState.breaksState[breakNum];
+
+            if (action === 'in') {
+                bState.inTime = timeStr;
+                bState.active = true;
+                bState.secondsLeft = 900;
+                
+                document.getElementById(`b1-in`).innerText = breakNum === 1 ? timeStr : document.getElementById(`b1-in`).innerText;
+                document.getElementById(`b2-in`).innerText = breakNum === 2 ? timeStr : document.getElementById(`b2-in`).innerText;
+
+                document.getElementById(`btn-b${breakNum}-in`).innerText = 'En curso...';
+                document.getElementById(`btn-b${breakNum}-in`).disabled = true;
+                document.getElementById(`btn-b${breakNum}-in`).className = 'px-2.5 py-1 bg-amber-300 text-amber-900 font-semibold rounded-xl cursor-not-allowed';
+                
+                const btnOut = document.getElementById(`btn-b${breakNum}-out`);
+                btnOut.disabled = false;
+                btnOut.className = 'px-2.5 py-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-xl shadow-2xs transition';
+                btnOut.innerText = 'Finalizar';
+
+                if (bState.timerId) clearInterval(bState.timerId);
+                bState.timerId = setInterval(() => {
+                    if (bState.secondsLeft > 0) {
+                        bState.secondsLeft--;
+                        updateBreakTimerDisplay(breakNum);
+                    } else {
+                        clearInterval(bState.timerId);
+                        showToast(`¡Tiempo de Break ${breakNum} finalizado! (15 min cumplidos)`);
+                    }
+                }, 1000);
+
+                showToast(`Break ${breakNum} iniciado`);
+            } else if (action === 'out') {
+                bState.outTime = timeStr;
+                bState.active = false;
+                if (bState.timerId) clearInterval(bState.timerId);
+
+                document.getElementById(`b${breakNum}-out`).innerText = timeStr;
+                
+                const btnIn = document.getElementById(`btn-b${breakNum}-in`);
+                btnIn.disabled = false;
+                btnIn.innerText = 'Iniciar';
+                btnIn.className = 'px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl shadow-2xs transition';
+
+                const btnOut = document.getElementById(`btn-b${breakNum}-out`);
+                btnOut.disabled = true;
+                btnOut.className = 'px-2.5 py-1 bg-slate-200 text-slate-500 font-semibold rounded-xl transition';
+                btnOut.innerText = 'Finalizar';
+
+                showToast(`Break ${breakNum} finalizado a las ${timeStr}`);
+            }
+            saveState();
+        }
+
+        function updateBreakTimerDisplay(breakNum) {
+            const bState = appState.breaksState[breakNum];
+            const m = Math.floor(bState.secondsLeft / 60);
+            const s = bState.secondsLeft % 60;
+            const timeFormatted = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            const timerEl = document.getElementById(`break-timer-${breakNum}`);
+            if (timerEl) {
+                timerEl.innerText = timeFormatted;
+                if (bState.secondsLeft <= 60) {
+                    timerEl.className = 'text-xs font-extrabold px-2.5 py-0.5 bg-rose-100 border border-rose-300 rounded-xl text-rose-600 animate-pulse';
+                } else {
+                    timerEl.className = 'text-xs font-extrabold px-2.5 py-0.5 bg-white border border-amber-200 rounded-xl text-amber-700';
+                }
+            }
+        }
+
+        function renderBreaksWidget() {
+            [1, 2].forEach(num => {
+                const b = appState.breaksState[num];
+                const inEl = document.getElementById(`b${num}-in`);
+                const outEl = document.getElementById(`b${num}-out`);
+                if (inEl) inEl.innerText = b.inTime;
+                if (outEl) outEl.innerText = b.outTime;
+                updateBreakTimerDisplay(num);
+            });
+        }
+
+        function openTimeLogHistoryModal() {
+            const modal = document.getElementById('history-modal');
+            modal.dataset.historyType = 'timelogs';
+            document.getElementById('history-title').innerText = 'Historial de Fichados de Jornada';
+            document.getElementById('history-search-input').value = '';
+            filterHistory();
+            modal.classList.remove('hidden');
+        }
+
+        function addDailyNote() {
+            const input = document.getElementById('daily-note-input');
+            if (!input || !input.value.trim()) return;
+            const text = input.value.trim();
+            const now = new Date();
+            const fechaHora = `${now.toLocaleDateString('es-AR')} ${now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}`;
+
+            appState.dailyNotes.unshift({ id: Date.now(), text, fechaHora });
+            input.value = '';
+            saveState();
+            renderDailyNotesWidget();
+            showToast('Nota diaria guardada');
+        }
+
+        function renderDailyNotesWidget() {
+            const container = document.getElementById('latest-daily-notes-list');
+            const topSticky = document.getElementById('top-sticky-notice-container');
+            
+            if (!container) return;
+
+            if (appState.dailyNotes && appState.dailyNotes.length > 0) {
+                const latest = appState.dailyNotes[0];
+                if (topSticky) {
+                    topSticky.classList.remove('hidden');
+                    topSticky.innerHTML = `
+                        <div class="p-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-3xl shadow-md border border-amber-400 flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
+                                    <i data-lucide="megaphone" class="w-5 h-5 text-white"></i>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] uppercase font-bold tracking-wider bg-black/20 px-2 py-0.5 rounded-md text-amber-100">Aviso / Nota del Día</span>
+                                    <h4 class="text-sm font-bold mt-0.5">${latest.text}</h4>
+                                </div>
+                            </div>
+                            <span class="text-[11px] text-amber-100 font-medium shrink-0 bg-black/10 px-3 py-1 rounded-xl">${latest.fechaHora}</span>
+                        </div>
+                    `;
+                }
+            } else {
+                if (topSticky) topSticky.classList.add('hidden');
+            }
+
+            if (!appState.dailyNotes || appState.dailyNotes.length === 0) {
+                container.innerHTML = `<div class="text-[11px] text-slate-400 italic">No hay notas registradas para hoy.</div>`;
+                return;
+            }
+            container.innerHTML = appState.dailyNotes.slice(0, 3).map((n, i) => `
+                <div class="text-xs p-2.5 bg-amber-50/80 border border-amber-200/60 rounded-xl flex items-start justify-between gap-2">
+                    <div>
+                        <span class="font-semibold text-slate-800">${n.text}</span>
+                        <div class="text-[10px] text-slate-400 mt-0.5">${n.fechaHora}</div>
+                    </div>
+                    <button onclick="deleteDailyNote(${i})" class="text-slate-400 hover:text-rose-600 p-0.5"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function deleteDailyNote(idx) {
+            appState.dailyNotes.splice(idx, 1);
+            saveState();
+            renderDailyNotesWidget();
+        }
+
+        function openDailyNotesHistoryModal() {
+            const modal = document.getElementById('history-modal');
+            modal.dataset.historyType = 'notes';
+            document.getElementById('history-title').innerText = 'Historial de Notas Diarias y Avisos';
+            document.getElementById('history-search-input').value = '';
+            filterHistory();
+            modal.classList.remove('hidden');
+        }
+
+        function renderCalls() {
+            const tbody = document.getElementById('calls-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            const callsList = appState.calls || [];
+            const activeCalls = callsList.filter(c => c && c.status !== 'Finalizado');
+
+            if (activeCalls.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">No hay llamadas activas.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = activeCalls.map((c) => {
+                const idx = appState.calls.findIndex(item => item.id === c.id);
+                const reqsList = c.requests || [];
+                const isEditing = editingCallId === c.id;
+
+                if (isEditing) {
+                    return `
+                        <tr class="align-top border-b border-pink-200 bg-pink-50/30">
+                            <td colspan="4" class="p-4 space-y-4">
+                                <div class="flex items-center justify-between border-b border-pink-200 pb-2">
+                                    <h4 class="font-bold text-slate-800 text-xs uppercase flex items-center gap-1.5">
+                                        <i data-lucide="edit-3" class="w-4 h-4 text-pink-500"></i> Editando Llamada In-Situ
+                                    </h4>
+                                    <div class="flex items-center gap-2">
+                                        <button onclick="cancelInlineEdit()" class="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-xl transition">Cancelar</button>
+                                        <button onclick="saveInlineEdit(${c.id})" class="px-4 py-1 bg-pink-500 hover:bg-pink-600 text-white text-xs font-semibold rounded-xl shadow-xs transition">Guardar Cambios</button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Teléfono</label>
+                                        <input type="text" id="inline-edit-phone-${c.id}" value="${c.phone || ''}" class="w-full px-3 py-1.5 text-xs bg-white border border-pink-200 rounded-xl font-bold text-pink-700">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Estado</label>
+                                        <select id="inline-edit-status-${c.id}" class="w-full px-3 py-1.5 text-xs bg-white border border-pink-200 rounded-xl font-semibold">
+                                            <option value="Llamada en curso" ${c.status === 'Llamada en curso' ? 'selected' : ''}>🟡 Llamada en curso</option>
+                                            <option value="Finalizado" ${c.status === 'Finalizado' ? 'selected' : ''}>✅ Finalizado (Archivar)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="inline-edit-requests-container-${c.id}" class="space-y-3">
+                                    ${reqsList.map((r, rIdx) => `
+                                        <div class="p-3 bg-white border border-pink-200 rounded-2xl space-y-3">
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Trámite</label>
+                                                    <select class="inline-req-tipo w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                                        <option value="Consulta" ${r.tipo === 'Consulta' ? 'selected' : ''}>Consulta</option>
+                                                        <option value="Estudio" ${r.tipo === 'Estudio' ? 'selected' : ''}>Estudio</option>
+                                                        <option value="Receta" ${r.tipo === 'Receta' ? 'selected' : ''}>Receta</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Grupo Etario</label>
+                                                    <select class="inline-req-grupo w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg font-bold">
+                                                        <option value="Adulto" ${r.grupoEtario === 'Adulto' ? 'selected' : ''}>👤 Adulto</option>
+                                                        <option value="Niño" ${r.grupoEtario === 'Niño' ? 'selected' : ''}>🧒 Niño</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Hospital</label>
+                                                    <select class="inline-req-hospital w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                                        ${generateHospitalSelectOptions(r.hospital)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="space-y-1.5">
+                                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Servicios, Doctores y DNI</label>
+                                                ${(r.servicios || []).map((s) => {
+                                                    const sName = typeof s === 'object' ? s.nombre : s;
+                                                    const sDoc = typeof s === 'object' ? s.doctor : '';
+                                                    const sDni = typeof s === 'object' ? (s.dni || '') : '';
+                                                    return `
+                                                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                                                            <div class="sm:col-span-5">
+                                                                <select class="inline-serv-name w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                                                    ${generateServicioSelectOptions(sName)}
+                                                                </select>
+                                                            </div>
+                                                            <div class="sm:col-span-4">
+                                                                <input type="text" value="${sDoc}" placeholder="Dr. específico" class="inline-serv-doc w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                                            </div>
+                                                            <div class="sm:col-span-3">
+                                                                <input type="text" value="${sDni}" placeholder="DNI Paciente" class="inline-serv-dni w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                                            </div>
+                                                        </div>
+                                                    `;
+                                                }).join('')}
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Observaciones</label>
+                                                <input type="text" value="${r.obs || ''}" placeholder="Anotaciones..." class="inline-req-obs w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+                
+                const reqsHtml = reqsList.map(r => {
+                    if (!r) return '';
+                    const isNiño = r.grupoEtario === 'Niño';
+                    const hLink = getHospitalLink(r.hospital);
+                    const linkBtn = (hLink && r.hospital !== "Cualquier hospital") ? 
+                        `<a href="${hLink}" target="_blank" class="inline-flex items-center gap-1 text-[10px] bg-pink-500 hover:bg-pink-600 text-white font-semibold px-2 py-0.5 rounded-xl shadow-2xs transition">Ingreso <i data-lucide="external-link" class="w-3 h-3"></i></a>` : '';
+
+                    const servsList = r.servicios || [];
+                    const servsVertical = servsList.map(s => {
+                        const sName = typeof s === 'string' ? s : (s ? s.nombre : '');
+                        if (!sName) return '';
+                        const sDoc = typeof s === 'object' && s.doctor ? s.doctor : '';
+                        const sDni = typeof s === 'object' && s.dni ? s.dni : '';
+                        
+                        const safePhone = (c.phone || '').replace(/'/g, "\\'");
+                        const safeHospital = (r.hospital || '').replace(/'/g, "\\'");
+                        const safeName = (sName || '').replace(/'/g, "\\'");
+                        const safeDoc = (sDoc || '').replace(/'/g, "\\'");
+                        const safeDni = (sDni || '').replace(/'/g, "\\'");
+
+                        const hoverItemClasses = isNiño
+                            ? 'hover:bg-amber-100/90 hover:border-amber-300 hover:shadow-md hover:shadow-amber-200/50 hover:translate-x-1'
+                            : 'hover:bg-pink-100/80 hover:border-pink-300 hover:shadow-md hover:shadow-pink-200/50 hover:translate-x-1';
+
+                        return `
+                            <div class="group flex flex-wrap items-center justify-between gap-2 py-2 px-3 bg-white/95 rounded-2xl border border-pink-100/60 my-1 shadow-2xs transition-all duration-200 ${hoverItemClasses}">
+                                <div class="flex items-center gap-2 truncate">
+                                    <span class="w-1.5 h-1.5 rounded-full ${isNiño ? 'bg-amber-400 group-hover:scale-150 group-hover:bg-amber-500' : 'bg-pink-400 group-hover:scale-150 group-hover:bg-pink-500'} transition-transform"></span>
+                                    <span class="${isNiño ? 'text-amber-950 font-bold' : 'text-slate-700 font-bold'} text-xs group-hover:text-black transition-colors">${sName}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    ${sDni ? `<span class="text-[10px] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-xl font-medium text-slate-600">DNI: ${sDni}</span>` : ''}
+                                    ${sDoc ? `
+                                        <span class="text-[11px] bg-pink-50 border border-pink-200/80 px-2.5 py-0.5 rounded-xl font-bold text-pink-700 shrink-0 flex items-center gap-1.5 shadow-2xs group-hover:bg-pink-500 group-hover:text-white group-hover:border-pink-500 transition-all duration-200">
+                                            <i data-lucide="user" class="w-3 h-3 text-pink-400 group-hover:text-white transition-colors"></i> Dr. ${sDoc}
+                                        </span>
+                                    ` : ''}
+                                    <button onclick="quickAssignTurn('${safePhone}', '${safeHospital}', '${safeName}', '${safeDoc}', '${safeDni}')" class="px-2.5 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold rounded-xl shadow-2xs flex items-center gap-1 transition" title="Asignar turno precargado">
+                                        <i data-lucide="calendar-plus" class="w-3 h-3"></i>
+                                        <span>+ Asignar Turno</span>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).filter(Boolean).join('');
+
+                    const cardBg = isNiño 
+                        ? 'bg-amber-50/80 border-amber-200 hover:bg-amber-100/50 shadow-amber-100/30' 
+                        : 'bg-pink-50/40 border-pink-100 hover:bg-pink-100/40 shadow-pink-100/30';
+
+                    return `
+                        <div class="py-2.5 px-3.5 rounded-2xl ${cardBg} border my-1.5 space-y-1.5 transition-all duration-200">
+                            <div class="flex items-center justify-between text-xs border-b border-pink-100/60 pb-1.5">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2.5 py-0.5 bg-pink-100 text-pink-800 rounded-xl text-[10px] font-bold uppercase tracking-wider">${r.tipo || 'Consulta'}</span>
+                                    <span class="text-[10px] font-bold ${isNiño ? 'text-amber-950 bg-amber-200/90 border border-amber-300 px-2 py-0.5 rounded-xl' : 'text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-xl'}">${isNiño ? '🧒 Niño' : '👤 Adulto'}</span>
+                                </div>
+                                <div class="flex items-center gap-2"><span class="font-bold text-xs text-slate-800">${r.hospital || 'Sin hospital'}</span> ${linkBtn}</div>
+                            </div>
+                            <div class="space-y-1">${servsVertical}</div>
+                            ${r.obs ? `<div class="text-[11px] text-slate-500 italic bg-white/70 p-2 rounded-xl border border-pink-100/40 mt-1">📝 ${r.obs}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <tr class="align-top border-b border-pink-100/40 hover:bg-pink-50/20">
+                        <td class="p-4 font-semibold text-slate-800 text-xs">
+                            <div class="font-bold text-sm text-pink-600 px-1 py-0.5">${c.phone || ''}</div>
+                            <div class="text-[11px] text-slate-400 mt-1.5 px-1">${c.fechaHora || ''}</div>
+                        </td>
+                        <td class="p-3">${reqsHtml}</td>
+                        <td class="p-3">
+                            <select onchange="updateCallStatus(${idx}, this.value)" class="p-1.5 rounded-xl border text-xs font-semibold ${c.status === 'Llamada en curso' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'}">
+                                <option value="Llamada en curso" ${c.status === 'Llamada en curso' ? 'selected' : ''}>🟡 Llamada en curso</option>
+                                <option value="Finalizado" ${c.status === 'Finalizado' ? 'selected' : ''}>✅ Finalizado (Archivar)</option>
+                            </select>
+                        </td>
+                        <td class="p-3 text-right">
+                            <div class="flex items-center justify-end gap-1">
+                                <button onclick="triggerInlineEdit(${c.id})" class="text-slate-400 hover:text-pink-500 p-1.5 transition" title="Editar directo en pantalla"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                <button onclick="deleteCall(${idx})" class="text-slate-400 hover:text-rose-500 p-1.5 transition" title="Eliminar llamada"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function triggerInlineEdit(id) {
+            editingCallId = id;
+            renderCalls();
+            lucide.createIcons();
+        }
+
+        function cancelInlineEdit() {
+            editingCallId = null;
+            renderCalls();
+            lucide.createIcons();
+        }
+
+        function saveInlineEdit(id) {
+            const call = appState.calls.find(c => c.id === id);
+            if (!call) return;
+
+            const phoneEl = document.getElementById(`inline-edit-phone-${id}`);
+            const statusEl = document.getElementById(`inline-edit-status-${id}`);
+
+            if (phoneEl) call.phone = phoneEl.value.trim();
+            if (statusEl) call.status = statusEl.value;
+
+            const reqBlocks = document.querySelectorAll(`#inline-edit-requests-container-${id} > div`);
+            reqBlocks.forEach((rBlock, rIdx) => {
+                if (call.requests[rIdx]) {
+                    const tipoEl = rBlock.querySelector('.inline-req-tipo');
+                    const grupoEl = rBlock.querySelector('.inline-req-grupo');
+                    const hospEl = rBlock.querySelector('.inline-req-hospital');
+                    const obsEl = rBlock.querySelector('.inline-req-obs');
+
+                    if (tipoEl) call.requests[rIdx].tipo = tipoEl.value;
+                    if (grupoEl) call.requests[rIdx].grupoEtario = grupoEl.value;
+                    if (hospEl) call.requests[rIdx].hospital = hospEl.value;
+                    if (obsEl) call.requests[rIdx].obs = obsEl.value.trim();
+
+                    const servRows = rBlock.querySelectorAll('.grid-cols-12');
+                    const updatedServs = [];
+                    servRows.forEach(sRow => {
+                        const nameEl = sRow.querySelector('.inline-serv-name');
+                        const docEl = sRow.querySelector('.inline-serv-doc');
+                        const dniEl = sRow.querySelector('.inline-serv-dni');
+                        if (nameEl) {
+                            updatedServs.push({
+                                nombre: nameEl.value,
+                                doctor: docEl ? docEl.value.trim() : '',
+                                dni: dniEl ? dniEl.value.trim() : ''
+                            });
+                        }
+                    });
+                    if (updatedServs.length > 0) call.requests[rIdx].servicios = updatedServs;
+                }
+            });
+
+            editingCallId = null;
+            saveState();
+            renderAll();
+            showToast('Llamada actualizada correctamente');
+        }
+
+        function updateHistoryCallStatus(callId, newStatus) {
+            const call = appState.calls.find(c => c.id === callId);
+            if (call) {
+                call.status = newStatus;
+                saveState();
+                filterHistory();
+                renderAll();
+                showToast(`Estado cambiado a "${newStatus}"`);
+            }
+        }
+
+        function updateClock() {
+            const el = document.getElementById('current-system-time');
+            if (!el) return;
+            const now = new Date();
+            const days = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+            const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+            const dayName = days[now.getDay()];
+            const day = String(now.getDate()).padStart(2, '0');
+            const monthName = months[now.getMonth()];
+            const year = now.getFullYear();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'p. m.' : 'a. m.';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            el.innerText = `${dayName}, ${day} ${monthName} ${year} • ${hours}:${minutes} ${ampm} hs`;
+        }
+
+        function updateStats() {
+            // Contadores precisos hoy vs total
+            const todayCalls = (appState.calls || []).filter(c => isDateToday(c.fechaHora)).length;
+            const totalCalls = (appState.calls || []).length;
+            const cToday = document.getElementById('dash-calls-today');
+            const cTotal = document.getElementById('dash-calls-total');
+            if (cToday) cToday.innerText = todayCalls;
+            if (cTotal) cTotal.innerText = `Total: ${totalCalls}`;
+
+            const todayAssigned = (appState.assigned || []).filter(a => isDateToday(a.fechaHora)).length;
+            const totalAssigned = (appState.assigned || []).length;
+            const dashAssignedToday = document.getElementById('dash-assigned-today');
+            const dashAssignedTotal = document.getElementById('dash-assigned-total');
+            const assignedBadge = document.getElementById('assigned-count-badge');
+            
+            if (dashAssignedToday) dashAssignedToday.innerText = todayAssigned;
+            if (dashAssignedTotal) dashAssignedTotal.innerText = `Total: ${totalAssigned}`;
+            if (assignedBadge) assignedBadge.innerText = `${todayAssigned} turnos hoy`;
+
+            // Pacientes registrados (Turnos otorgados + historias médicas cargadas hoy / total)
+            const todayPatients = (appState.assigned || []).filter(a => isDateToday(a.fechaHora)).length;
+            const totalPatients = (appState.assigned || []).length + (appState.epicrisis || []).length;
+            const pToday = document.getElementById('dash-patients-today');
+            const pTotal = document.getElementById('dash-patients-total');
+            if (pToday) pToday.innerText = todayPatients;
+            if (pTotal) pTotal.innerText = `Total: ${totalPatients}`;
+
+            const todayHab = (appState.habilitacion || []).filter(h => isDateToday(h.fechaHora)).length;
+            const totalHab = (appState.habilitacion || []).length;
+            const dashHabToday = document.getElementById('dash-hab-today');
+            const dashHabTotal = document.getElementById('dash-hab-total');
+            if (dashHabToday) dashHabToday.innerText = todayHab;
+            if (dashHabTotal) dashHabTotal.innerText = `Total: ${totalHab}`;
+        }
+
+        function renderAssigned() {
+            const tbody = document.getElementById('assigned-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const list = (appState.assigned || []).filter(a => isDateToday(a.fechaHora));
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 italic">No hay turnos registrados para el día de hoy.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map((a) => {
+                const idx = appState.assigned.findIndex(item => item.id === a.id);
+                return `
+                    <tr class="hover:bg-emerald-50/20 transition-colors">
+                        <td class="p-3 font-semibold text-slate-800">${a.patient || ''}</td>
+                        <td class="p-3 text-slate-600 font-medium">${a.phone || ''} ${a.dni ? `<span class="block text-[10px] text-slate-400">DNI: ${a.dni}</span>` : ''}</td>
+                        <td class="p-3 font-medium text-emerald-700">${a.fechaHora || ''}</td>
+                        <td class="p-3 font-bold text-slate-700">${a.hospital || ''} <span class="block text-[10px] font-semibold text-emerald-600">${a.servicio || ''}</span></td>
+                        <td class="p-3 text-slate-600 font-medium">${a.doctor || ''}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="deleteAssigned(${idx})" class="text-slate-400 hover:text-rose-500 p-1 transition" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderHabilitacion() {
+            const tbody = document.getElementById('habilitacion-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const list = (appState.habilitacion || []).filter(h => isDateToday(h.fechaHora));
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 italic">No hay habilitaciones de agenda para hoy.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map((h) => {
+                const idx = appState.habilitacion.findIndex(item => item.id === h.id);
+                return `
+                    <tr class="hover:bg-indigo-50/20 transition-colors">
+                        <td class="p-3 font-semibold text-slate-800">${h.servicio || ''} ${h.codigo ? `<span class="text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded-md ml-1 font-bold">${h.codigo}</span>` : ''}</td>
+                        <td class="p-3 font-bold text-slate-700">${h.hospital || ''}</td>
+                        <td class="p-3 text-slate-600 font-medium">${h.doctor || ''}</td>
+                        <td class="p-3 text-slate-600">${h.fechaHora || ''}</td>
+                        <td class="p-3 text-indigo-600 font-semibold">${h.mes || ''}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="deleteHabilitacion(${idx})" class="text-slate-400 hover:text-rose-500 p-1 transition" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderAgenda() {
+            const container = document.getElementById('agenda-items-list');
+            if (!container) return;
+            if (!appState.agendaItems || appState.agendaItems.length === 0) {
+                container.innerHTML = `<div class="text-xs text-slate-400 italic">No hay tareas pendientes en tu agenda.</div>`;
+                return;
+            }
+            container.innerHTML = appState.agendaItems.map((item, i) => `
+                <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs">
+                    <span class="font-semibold text-slate-700">${item}</span>
+                    <button onclick="deleteAgendaItem(${i})" class="text-slate-400 hover:text-rose-500 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+        }
+
+        /* --- LÓGICA DE HISTORIA CLÍNICA PERSONAL --- */
+        function switchClinicaSubtab(subtab) {
+            const btnEpicrisis = document.getElementById('subnav-epicrisis');
+            const btnEstudios = document.getElementById('subnav-estudios');
+            const subEpicrisis = document.getElementById('clinica-sub-epicrisis');
+            const subEstudios = document.getElementById('clinica-sub-estudios');
+
+            if (subtab === 'epicrisis') {
+                btnEpicrisis.className = 'px-4 py-1.5 rounded-xl text-xs font-bold transition bg-white text-slate-800 shadow-sm';
+                btnEstudios.className = 'px-4 py-1.5 rounded-xl text-xs font-semibold transition text-slate-600 hover:text-slate-900';
+                subEpicrisis.classList.remove('hidden');
+                subEstudios.classList.add('hidden');
+            } else {
+                btnEstudios.className = 'px-4 py-1.5 rounded-xl text-xs font-bold transition bg-pink-500 text-white shadow-sm';
+                btnEpicrisis.className = 'px-4 py-1.5 rounded-xl text-xs font-semibold transition text-slate-600 hover:text-slate-900';
+                subEstudios.classList.remove('hidden');
+                subEpicrisis.classList.add('hidden');
+            }
+        }
+
+        function renderEpicrisisTable() {
+            const tbody = document.getElementById('epicrisis-table-body');
+            const searchVal = (document.getElementById('epicrisis-search')?.value || '').toLowerCase();
+            if (!tbody) return;
+
+            const list = (appState.epicrisis || []).filter(e => 
+                (e.detalle || '').toLowerCase().includes(searchVal) ||
+                (e.profesional || '').toLowerCase().includes(searchVal) ||
+                (e.centro || '').toLowerCase().includes(searchVal) ||
+                (e.servicio || '').toLowerCase().includes(searchVal)
+            );
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="12" class="p-6 text-center text-slate-400 italic">No hay registros en epicrisis y consultas.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(e => {
+                const isFinalizado = e.estado === 'FINALIZADO';
+                return `
+                    <tr class="hover:bg-amber-50/20 transition-colors">
+                        <td class="p-3 font-bold text-slate-700">${e.fecha}</td>
+                        <td class="p-3 font-semibold text-slate-500">${e.dia || '-'}</td>
+                        <td class="p-3">
+                            <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold ${isFinalizado ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${e.estado}</span>
+                        </td>
+                        <td class="p-3 font-bold text-slate-800">${e.detalle}</td>
+                        <td class="p-3 text-slate-600 max-w-xs truncate" title="${e.descripcion || ''}">${e.descripcion ? e.descripcion.replace(/\n/g, '<br>') : '-'}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-lg text-[10px] font-semibold">${e.centro || '-'}</span></td>
+                        <td class="p-3 text-slate-700 font-medium">${e.profesional || '-'}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg text-[10px]">${e.tipo || '-'}</span></td>
+                        <td class="p-3"><span class="px-2 py-0.5 bg-pink-50 text-pink-700 border border-pink-200 rounded-lg text-[10px] font-bold">${e.servicio || '-'}</span></td>
+                        <td class="p-3 text-slate-600">${e.horario || '-'}</td>
+                        <td class="p-3 text-slate-500 font-medium">${e.archivo ? `<span class="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px]">📄 ${e.archivo}</span>` : '-'}</td>
+                        <td class="p-3 text-rose-600 font-semibold">${e.medicacion ? `<span class="px-2 py-0.5 bg-rose-50 border border-rose-200 rounded text-[10px]">⏰ ${e.medicacion}</span>` : '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderEstudiosGallery() {
+            const grid = document.getElementById('estudios-gallery-grid');
+            const searchVal = (document.getElementById('estudios-search')?.value || '').toLowerCase();
+            if (!grid) return;
+
+            const list = (appState.estudios || []).filter(st =>
+                (st.titulo || '').toLowerCase().includes(searchVal) ||
+                (st.motivo || '').toLowerCase().includes(searchVal) ||
+                (st.hospital || '').toLowerCase().includes(searchVal)
+            );
+
+            if (list.length === 0) {
+                grid.innerHTML = `<div class="col-span-3 p-8 text-center text-slate-400 italic">No hay estudios médicos registrados.</div>`;
+                return;
+            }
+
+            grid.innerHTML = list.map(st => {
+                let bannerBg = 'bg-amber-400';
+                if (st.color === 'purple') bannerBg = 'bg-gradient-to-r from-indigo-500 to-purple-500';
+                if (st.color === 'red') bannerBg = 'bg-rose-500';
+                if (st.color === 'indigo') bannerBg = 'bg-indigo-400';
+
+                return `
+                    <div class="bg-white rounded-3xl border border-pink-100 overflow-hidden shadow-2xs flex flex-col justify-between hover:shadow-md transition">
+                        <div>
+                            <div class="h-16 ${bannerBg} p-3 flex items-start justify-between text-white">
+                                <span class="bg-black/20 px-2 py-0.5 rounded-lg text-[10px] font-bold tracking-wider">📄 INFORME MÉDICO</span>
+                                <span class="text-xs font-semibold">${st.fecha}</span>
+                            </div>
+                            <div class="p-5 space-y-3">
+                                <div>
+                                    <h4 class="font-extrabold text-slate-900 text-sm">${st.titulo}</h4>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Motivo: <span class="font-semibold text-slate-600">${st.motivo || 'N/A'}</span></p>
+                                </div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="px-2.5 py-0.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-[10px] font-bold">${st.hospital || 'Clínica'}</span>
+                                    <span class="px-2.5 py-0.5 bg-pink-50 border border-pink-200 text-pink-700 rounded-xl text-[10px] font-bold">${st.servicio || 'Servicio'}</span>
+                                </div>
+                                <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl text-[11px] text-slate-700 whitespace-pre-line max-h-40 overflow-y-auto">
+                                    <strong class="block text-slate-900 mb-1">INFORME / RESULTADOS:</strong>
+                                    ${st.conclusiones || 'Sin conclusiones detalladas.'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-5 pb-4 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                            <span>Archivo: ${st.pdf || 'DOCUMENTO.PDF'}</span>
+                            <button onclick="deleteEstudio(${st.id})" class="text-slate-400 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function openNewEpicrisisModal() {
+            document.getElementById('epicrisis-edit-id').value = '';
+            document.getElementById('epi-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('epi-estado').value = 'FINALIZADO';
+            document.getElementById('epi-horario').value = '';
+            document.getElementById('epi-detalle').value = '';
+            document.getElementById('epi-centro').innerHTML = generateHospitalSelectOptions('CLÍNICA DEL SOL');
+            document.getElementById('epi-profesional').value = '';
+            document.getElementById('epi-tipo').value = 'Consulta médica';
+            document.getElementById('epi-servicio').innerHTML = generateServicioSelectOptions('GINECOLOGÍA');
+            document.getElementById('epi-descripcion').value = '';
+            document.getElementById('epi-archivo').value = '';
+            document.getElementById('epi-medicacion').value = '';
+            document.getElementById('epicrisis-modal').classList.remove('hidden');
+        }
+
+        function closeEpicrisisModal() {
+            document.getElementById('epicrisis-modal').classList.add('hidden');
+        }
+
+        function saveEpicrisisForm(e) {
+            e.preventDefault();
+            const fecha = document.getElementById('epi-fecha').value;
+            const dObj = new Date(fecha);
+            const days = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
+            const dia = days[dObj.getDay() + 1 ? dObj.getDay() + 1 : 0] || 'LUNES';
+
+            const newItem = {
+                id: Date.now(),
+                fecha,
+                dia,
+                estado: document.getElementById('epi-estado').value,
+                detalle: document.getElementById('epi-detalle').value.trim(),
+                descripcion: document.getElementById('epi-descripcion').value.trim(),
+                centro: document.getElementById('epi-centro').value,
+                profesional: document.getElementById('epi-profesional').value.trim(),
+                tipo: document.getElementById('epi-tipo').value.trim(),
+                servicio: document.getElementById('epi-servicio').value,
+                horario: document.getElementById('epi-horario').value.trim(),
+                archivo: document.getElementById('epi-archivo').value.trim(),
+                medicacion: document.getElementById('epi-medicacion').value.trim()
+            };
+
+            appState.epicrisis.unshift(newItem);
+            saveState();
+            renderEpicrisisTable();
+            closeEpicrisisModal();
+            showToast('Registro de epicrisis guardado');
+        }
+
+        function openNewEstudioModal() {
+            document.getElementById('estudio-edit-id').value = '';
+            document.getElementById('est-titulo').value = '';
+            document.getElementById('est-color').value = 'amber';
+            document.getElementById('est-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('est-motivo').value = '';
+            document.getElementById('est-hospital').innerHTML = generateHospitalSelectOptions('CLÍNICA DEL SOL');
+            document.getElementById('est-servicio').innerHTML = generateServicioSelectOptions('GINECOLOGÍA');
+            document.getElementById('est-pdf').value = '';
+            document.getElementById('est-conclusiones').value = '';
+            document.getElementById('estudio-modal').classList.remove('hidden');
+        }
+
+        function closeEstudioModal() {
+            document.getElementById('estudio-modal').classList.add('hidden');
+        }
+
+        function saveEstudioForm(e) {
+            e.preventDefault();
+            const newEstudio = {
+                id: Date.now(),
+                titulo: document.getElementById('est-titulo').value.trim(),
+                color: document.getElementById('est-color').value,
+                fecha: document.getElementById('est-fecha').value,
+                motivo: document.getElementById('est-motivo').value.trim(),
+                hospital: document.getElementById('est-hospital').value,
+                servicio: document.getElementById('est-servicio').value,
+                pdf: document.getElementById('est-pdf').value.trim(),
+                conclusiones: document.getElementById('est-conclusiones').value.trim()
+            };
+
+            appState.estudios.unshift(newEstudio);
+            saveState();
+            renderEstudiosGallery();
+            closeEstudioModal();
+            showToast('Estudio médico guardado');
+        }
+
+        function deleteEstudio(id) {
+            if (confirm('¿Deseas eliminar este estudio médico?')) {
+                appState.estudios = appState.estudios.filter(st => st.id !== id);
+                saveState();
+                renderEstudiosGallery();
+                showToast('Estudio eliminado');
+            }
+        }
+
+        function renderMedications() {
+            const container = document.getElementById('medication-items-list');
+            if (!container) return;
+            if (!appState.medications || appState.medications.length === 0) {
+                container.innerHTML = `<div class="text-xs text-slate-400 italic">No hay medicamentos guardados.</div>`;
+                return;
+            }
+            container.innerHTML = appState.medications.map((m, i) => `
+                <div class="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs">
+                    <div>
+                        <div class="font-bold text-slate-800">${m.name}</div>
+                        <div class="text-[11px] text-rose-500 font-semibold">${m.schedule}</div>
+                    </div>
+                    <button onclick="deleteMedication(${i})" class="text-slate-400 hover:text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function renderAll() {
+            renderCalls();
+            renderAssigned();
+            renderHabilitacion();
+            renderAgenda();
+            renderEpicrisisTable();
+            renderEstudiosGallery();
+            renderMedications();
+            renderTimeLogWidget();
+            renderDailyNotesWidget();
+            updateStats();
+            lucide.createIcons();
+        }
+
+        function updateCallStatus(idx, status) {
+            if (appState.calls[idx]) {
+                appState.calls[idx].status = status;
+                saveState();
+                renderAll();
+                showToast(`Llamada ${status === 'Finalizado' ? 'archivada' : 'actualizada'}`);
+            }
+        }
+
+        function deleteCall(idx) {
+            appState.calls.splice(idx, 1);
+            saveState();
+            renderAll();
+            showToast('Llamada eliminada');
+        }
+
+        function deleteAssigned(idx) {
+            appState.assigned.splice(idx, 1);
+            saveState();
+            renderAll();
+            showToast('Turno eliminado');
+        }
+
+        function deleteHabilitacion(idx) {
+            appState.habilitacion.splice(idx, 1);
+            saveState();
+            renderAll();
+            showToast('Habilitación eliminada');
+        }
+
+        function deleteAgendaItem(idx) {
+            appState.agendaItems.splice(idx, 1);
+            saveState();
+            renderAll();
+        }
+
+        function deleteMedication(idx) {
+            appState.medications.splice(idx, 1);
+            saveState();
+            renderAll();
+        }
+
+        function addAgendaItemPrompt() {
+            const val = prompt('Ingrese la nueva tarea personal:');
+            if (val && val.trim()) {
+                appState.agendaItems.unshift(val.trim());
+                saveState();
+                renderAll();
+            }
+        }
+
+        function addMedicationPrompt() {
+            const name = prompt('Nombre del medicamento:');
+            if (!name) return;
+            const schedule = prompt('Esquema / Dosis (Ej: Cada 8 horas):');
+            appState.medications.unshift({ name, schedule: schedule || '' });
+            saveState();
+            renderAll();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const label = document.getElementById('sidebar-label');
+            const icon = document.getElementById('icon-toggle-sidebar');
+            const navTexts = document.querySelectorAll('.nav-text');
+
+            if (sidebar.classList.contains('w-full') || sidebar.classList.contains('md:w-60')) {
+                sidebar.classList.remove('md:w-60');
+                sidebar.classList.add('md:w-16');
+                if (label) label.classList.add('opacity-0', 'hidden');
+                navTexts.forEach(t => t.classList.add('hidden'));
+                if (icon) icon.setAttribute('data-lucide', 'panel-left-open');
+            } else {
+                sidebar.classList.remove('md:w-16');
+                sidebar.classList.add('md:w-60');
+                if (label) label.classList.remove('opacity-0', 'hidden');
+                navTexts.forEach(t => t.classList.remove('hidden'));
+                if (icon) icon.setAttribute('data-lucide', 'panel-left-close');
+            }
+            lucide.createIcons();
+        }
+
+        function togglePlatformsSection() {
+            const content = document.getElementById('platforms-content');
+            const icon = document.getElementById('icon-toggle-platforms');
+            const btnText = document.querySelector('#btn-toggle-platforms span');
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                if (icon) icon.classList.remove('rotate-180');
+                if (btnText) btnText.innerText = 'Ocultar enlaces';
+            } else {
+                content.classList.add('hidden');
+                if (icon) icon.classList.add('rotate-180');
+                if (btnText) btnText.innerText = 'Mostrar enlaces';
+            }
+        }
+
+        function toggleSectionCollapse(containerId, iconId) {
+            const container = document.getElementById(containerId);
+            const icon = document.getElementById(iconId);
+            if (!container) return;
+
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                if (icon) icon.classList.remove('rotate-180');
+            } else {
+                container.classList.add('hidden');
+                if (icon) icon.classList.add('rotate-180');
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if (activeTab) activeTab.classList.remove('hidden');
+
+            const navs = ['callcenter', 'agenda', 'clinica', 'medicacion', 'calendario'];
+            navs.forEach(n => {
+                const btn = document.getElementById(`nav-${n}`);
+                if (btn) {
+                    btn.className = (n === tabId) 
+                        ? 'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition bg-pink-500 text-white shadow-sm shadow-pink-300/40'
+                        : 'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition hover:bg-pink-50 text-slate-600 hover:text-pink-600';
+                }
+            });
+
+            const titles = {
+                'callcenter': 'CALL CENTER / TRABAJO',
+                'agenda': 'AGENDA PERSONAL',
+                'clinica': 'HISTORIA CLÍNICA PERSONAL',
+                'medicacion': 'CONTROL MEDICACION',
+                'calendario': 'CALENDARIO OPERATIVO'
+            };
+            const subtitles = {
+                'callcenter': 'Panel operativo de registros telefónicos, turnos y habilitaciones.',
+                'agenda': 'Lista personal de pendientes y recordatorios diarios.',
+                'clinica': 'Tus registros de epicrisis, consultas y galería de estudios médicos.',
+                'medicacion': 'Control de administración y horarios de fármacos.',
+                'calendario': 'Planificación general de turnos y guardias.'
+            };
+            document.getElementById('section-title').querySelector('span').innerText = titles[tabId] || 'WORKSPACE';
+            document.getElementById('section-subtitle').innerText = subtitles[tabId] || '';
+
+            const headerBtn = document.getElementById('header-action-btn');
+            if (tabId === 'clinica') {
+                headerBtn.innerHTML = `<i data-lucide="plus" class="w-4 h-4"></i><span>Nuevo Registro</span>`;
+                headerBtn.setAttribute('onclick', 'openNewEpicrisisModal()');
+            } else {
+                headerBtn.innerHTML = `<i data-lucide="plus" class="w-4 h-4"></i><span>Nuevo Registro</span>`;
+                headerBtn.setAttribute('onclick', "openGlobalModal('callcenter')");
+            }
+            lucide.createIcons();
+        }
+
+        function generateServicioSelectOptions(selected) {
+            return listaServicios.map(s => `<option value="${s}" ${s === selected ? 'selected' : ''}>${s}</option>`).join('');
+        }
+
+        function generateHospitalSelectOptions(selected) {
+            return listaHospitales.map(h => `<option value="${h}" ${h === selected ? 'selected' : ''}>${h}</option>`).join('');
+        }
+
+        function getHospitalLink(name) {
+            return hospitalLinks[name] || null;
+        }
+
+        let callRequestCounter = 0;
+        function addSolicitudRow() {
+            const list = document.getElementById('call-requests-list');
+            if (!list) return;
+
+            list.querySelectorAll('.call-req-card').forEach(card => {
+                const body = card.querySelector('.call-req-body');
+                const headerSummary = card.querySelector('.call-req-summary');
+                if (body && headerSummary) {
+                    body.classList.add('hidden');
+                    headerSummary.classList.remove('hidden');
+                }
+            });
+
+            callRequestCounter++;
+            const reqId = callRequestCounter;
+
+            const div = document.createElement('div');
+            div.className = 'call-req-card border border-pink-200/80 rounded-3xl p-4 bg-white space-y-3 transition-all duration-200 shadow-2xs';
+            div.id = `call-req-card-${reqId}`;
+
+            div.innerHTML = `
+                <div class="flex items-center justify-between cursor-pointer border-b border-pink-100/60 pb-2" onclick="toggleCallReqCollapse(${reqId})">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-pink-500 text-white font-bold text-xs flex items-center justify-center">#${reqId}</span>
+                        <div class="call-req-summary hidden flex flex-wrap items-center gap-1.5 text-xs">
+                            <span class="font-bold text-slate-700 summary-tramite">Consulta</span>
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-bold summary-grupo">Adulto</span>
+                            <span class="font-semibold text-pink-600 summary-hosp">CÓRDOBA</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-pink-400 transition-transform" id="call-req-icon-${reqId}"></i>
+                        <button type="button" onclick="event.stopPropagation(); removeCallReqRow(${reqId})" class="text-slate-400 hover:text-rose-500 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+
+                <div class="call-req-body space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Tipo de Trámite</label>
+                            <select class="req-tipo w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl" onchange="updateReqSummary(${reqId})">
+                                <option value="Consulta">Consulta</option>
+                                <option value="Estudio">Estudio</option>
+                                <option value="Receta">Receta</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Paciente (Grupo Etario)</label>
+                            <select class="req-grupo w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold" onchange="updateReqSummary(${reqId})">
+                                <option value="Adulto">👤 Adulto</option>
+                                <option value="Niño">🧒 Niño (Pediátrico)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-xs font-semibold text-slate-700">Servicios / Especialidades & Doctores</label>
+                            <button type="button" onclick="addServiceRowToReq(${reqId})" class="text-[11px] text-pink-600 hover:text-pink-800 font-bold flex items-center gap-1">
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> + Agregar Servicio / Especialidad
+                            </button>
+                        </div>
+                        <div class="req-servs-list space-y-2" id="req-servs-list-${reqId}"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Hospital / Centro Destino</label>
+                        <select class="req-hospital w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl" onchange="updateReqSummary(${reqId})">
+                            ${generateHospitalSelectOptions('CÓRDOBA')}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Observaciones / Anotaciones adicionales</label>
+                        <textarea class="req-obs w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl h-16" placeholder="Anotaciones importantes de la llamada..."></textarea>
+                    </div>
+                </div>
+            `;
+
+            list.appendChild(div);
+            addServiceRowToReq(reqId);
+            lucide.createIcons();
+        }
+
+        function addServiceRowToReq(reqId) {
+            const container = document.getElementById(`req-servs-list-${reqId}`);
+            if (!container) return;
+
+            const div = document.createElement('div');
+            div.className = 'grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-pink-50/40 p-2 rounded-2xl border border-pink-100/60';
+            div.innerHTML = `
+                <div class="sm:col-span-5">
+                    <select class="serv-select w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl font-bold">
+                        ${generateServicioSelectOptions('ALERGOLOGIA')}
+                    </select>
+                </div>
+                <div class="sm:col-span-4">
+                    <input type="text" placeholder="Dr. específico" class="serv-doc w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl">
+                </div>
+                <div class="sm:col-span-2">
+                    <input type="text" placeholder="DNI Paciente" class="serv-dni w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl">
+                </div>
+                <div class="sm:col-span-1 text-center">
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-slate-400 hover:text-rose-500 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `;
+            container.appendChild(div);
+            lucide.createIcons();
+        }
+
+        function removeCallReqRow(reqId) {
+            const card = document.getElementById(`call-req-card-${reqId}`);
+            if (card) card.remove();
+        }
+
+        function toggleCallReqCollapse(reqId) {
+            const card = document.getElementById(`call-req-card-${reqId}`);
+            if (!card) return;
+            const body = card.querySelector('.call-req-body');
+            const summary = card.querySelector('.call-req-summary');
+            const icon = document.getElementById(`call-req-icon-${reqId}`);
+
+            if (body.classList.contains('hidden')) {
+                body.classList.remove('hidden');
+                if (summary) summary.classList.add('hidden');
+                if (icon) icon.classList.remove('rotate-180');
+            } else {
+                body.classList.add('hidden');
+                if (summary) summary.classList.remove('hidden');
+                if (icon) icon.classList.add('rotate-180');
+            }
+        }
+
+        function updateReqSummary(reqId) {
+            const card = document.getElementById(`call-req-card-${reqId}`);
+            if (!card) return;
+
+            const tipo = card.querySelector('.req-tipo')?.value || '';
+            const grupo = card.querySelector('.req-grupo')?.value || '';
+            const hosp = card.querySelector('.req-hospital')?.value || '';
+
+            const sumTipo = card.querySelector('.summary-tramite');
+            const sumGrupo = card.querySelector('.summary-grupo');
+            const sumHosp = card.querySelector('.summary-hosp');
+
+            if (sumTipo) sumTipo.innerText = tipo;
+            if (sumGrupo) sumGrupo.innerText = grupo;
+            if (sumHosp) sumHosp.innerText = hosp;
+        }
+
+        let assignedCounter = 0;
+        function addAssignedRow() {
+            assignedCounter++;
+            const list = document.getElementById('assigned-rows-list');
+            if (!list) return;
+
+            const div = document.createElement('div');
+            div.className = 'grid grid-cols-1 md:grid-cols-5 gap-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl items-center';
+            div.id = `assigned-row-${assignedCounter}`;
+            div.innerHTML = `
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Hospital</label>
+                    <select class="ass-row-hosp w-full px-2 py-1 text-xs bg-white border border-slate-200 rounded-xl">
+                        ${generateHospitalSelectOptions('CÓRDOBA')}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Servicio</label>
+                    <select class="ass-row-serv w-full px-2 py-1 text-xs bg-white border border-slate-200 rounded-xl">
+                        ${generateServicioSelectOptions('CARDIOLOGIA')}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Doctor</label>
+                    <input type="text" class="ass-row-doc w-full px-2 py-1 text-xs bg-white border border-slate-200 rounded-xl" placeholder="Dr. Nombre">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Fecha & Hora</label>
+                    <input type="text" class="ass-row-fecha w-full px-2 py-1 text-xs bg-white border border-slate-200 rounded-xl" placeholder="DD/MM/YYYY HH:MM">
+                </div>
+                <div class="text-right">
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-slate-400 hover:text-rose-500 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `;
+            list.appendChild(div);
+            lucide.createIcons();
+        }
+
+        function quickAssignTurn(phone, hospital, servicio, doctor, dni) {
+            openGlobalModal('assigned');
+            const phoneInput = document.getElementById('ass-phone');
+            const dniInput = document.getElementById('ass-dni');
+
+            if (phoneInput) phoneInput.value = phone || '';
+            if (dniInput) dniInput.value = dni || '';
+
+            const list = document.getElementById('assigned-rows-list');
+            list.innerHTML = '';
+            addAssignedRow();
+
+            const row = list.children[0];
+            if (row) {
+                const hospEl = row.querySelector('.ass-row-hosp');
+                const servEl = row.querySelector('.ass-row-serv');
+                const docEl = row.querySelector('.ass-row-doc');
+                const dateEl = row.querySelector('.ass-row-fecha');
+
+                if (hospEl) hospEl.value = hospital || 'CÓRDOBA';
+                if (servEl) servEl.value = servicio || 'ALERGOLOGIA';
+                if (docEl) docEl.value = doctor || '';
+
+                const now = new Date();
+                const todayStr = now.toLocaleDateString('es-AR');
+                if (dateEl) dateEl.value = `${todayStr} 10:30 hs`;
+            }
+
+            showToast('Formulario precargado con los datos de la solicitud');
+        }
+
+        function openGlobalModal(module) {
+            const modal = document.getElementById('global-modal');
+            const formModule = document.getElementById('form-module');
+            formModule.value = module;
+
+            document.getElementById('callcenter-fields').classList.add('hidden');
+            document.getElementById('assigned-fields').classList.add('hidden');
+            document.getElementById('habilitacion-fields').classList.add('hidden');
+
+            if (module === 'callcenter') {
+                document.getElementById('modal-title').innerText = 'Nuevo Registro de Llamada';
+                document.getElementById('callcenter-fields').classList.remove('hidden');
+                document.getElementById('call-requests-list').innerHTML = '';
+                callRequestCounter = 0;
+                addSolicitudRow();
+            } else if (module === 'assigned') {
+                document.getElementById('modal-title').innerText = 'Asignación Múltiple de Turnos';
+                document.getElementById('assigned-fields').classList.remove('hidden');
+                if (document.getElementById('assigned-rows-list').children.length === 0) {
+                    addAssignedRow();
+                }
+            } else if (module === 'habilitacion') {
+                document.getElementById('modal-title').innerText = 'Habilitación de Agendas';
+                document.getElementById('habilitacion-fields').classList.remove('hidden');
+                document.getElementById('hab-servicio').innerHTML = generateServicioSelectOptions('GINECOLOGIA');
+                document.getElementById('hab-hospital').innerHTML = generateHospitalSelectOptions('SAN ROQUE NUEVO');
+            }
+
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function openAssignedModal() {
+            openGlobalModal('assigned');
+        }
+
+        function openHabilitacionModal() {
+            openGlobalModal('habilitacion');
+        }
+
+        function closeGlobalModal() {
+            document.getElementById('global-modal').classList.add('hidden');
+        }
+
+        function handleGlobalSubmit(e) {
+            e.preventDefault();
+            const module = document.getElementById('form-module').value;
+
+            if (module === 'callcenter') {
+                const phone = document.getElementById('call-phone').value.trim();
+                if (!phone) {
+                    alert('Por favor ingrese un número de teléfono de contacto.');
+                    return;
+                }
+
+                const requests = [];
+                document.querySelectorAll('#call-requests-list .call-req-card').forEach(card => {
+                    const tipo = card.querySelector('.req-tipo')?.value || 'Consulta';
+                    const grupoEtario = card.querySelector('.req-grupo')?.value || 'Adulto';
+                    const hospital = card.querySelector('.req-hospital')?.value || 'CÓRDOBA';
+                    const obs = card.querySelector('.req-obs')?.value.trim() || '';
+
+                    const servicios = [];
+                    card.querySelectorAll('.req-servs-list > div').forEach(sRow => {
+                        const name = sRow.querySelector('.serv-select')?.value;
+                        const doc = sRow.querySelector('.serv-doc')?.value.trim() || '';
+                        const dni = sRow.querySelector('.serv-dni')?.value.trim() || '';
+                        if (name) {
+                            servicios.push({ nombre: name, doctor: doc, dni: dni });
+                        }
+                    });
+
+                    requests.push({ tipo, grupoEtario, servicios, hospital, obs });
+                });
+
+                const now = new Date();
+                const fechaHora = `${now.toLocaleDateString('es-AR')} - ${now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} hs`;
+
+                appState.calls.unshift({
+                    id: Date.now(),
+                    phone,
+                    status: 'Llamada en curso',
+                    fechaHora,
+                    requests
+                });
+
+                showToast('Llamada registrada con éxito');
+
+            } else if (module === 'assigned') {
+                const patient = document.getElementById('ass-patient').value.trim();
+                const dni = document.getElementById('ass-dni').value.trim();
+                const phone = document.getElementById('ass-phone').value.trim();
+
+                const rows = document.querySelectorAll('#assigned-rows-list > div');
+                if (rows.length === 0) {
+                    alert('Debe agregar al menos un turno.');
+                    return;
+                }
+
+                rows.forEach(r => {
+                    const hospital = r.querySelector('.ass-row-hosp')?.value;
+                    const servicio = r.querySelector('.ass-row-serv')?.value;
+                    const doctor = r.querySelector('.ass-row-doc')?.value.trim();
+                    const fechaHora = r.querySelector('.ass-row-fecha')?.value.trim();
+
+                    appState.assigned.unshift({
+                        id: Date.now() + Math.random(),
+                        patient,
+                        dni,
+                        phone,
+                        hospital,
+                        servicio,
+                        doctor,
+                        fechaHora: fechaHora || `${new Date().toLocaleDateString('es-AR')} 10:00 hs`
+                    });
+                });
+
+                showToast('Turnos asignados correctamente');
+
+            } else if (module === 'habilitacion') {
+                const servicio = document.getElementById('hab-servicio').value;
+                const codigo = document.getElementById('hab-codigo').value.trim();
+                const hospital = document.getElementById('hab-hospital').value;
+                const doctor = document.getElementById('hab-doctor').value.trim();
+                const fecha = document.getElementById('hab-fecha').value;
+                const hora = document.getElementById('hab-hora').value.trim();
+                const mes = document.getElementById('hab-mes').value;
+                const obs = document.getElementById('hab-obs').value.trim();
+
+                let fechaFormatted = new Date().toLocaleDateString('es-AR');
+                if (fecha) {
+                    const parts = fecha.split('-');
+                    if (parts.length === 3) fechaFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+
+                const fechaHora = `${fechaFormatted} ${hora || ''}`.trim();
+
+                appState.habilitacion.unshift({
+                    id: Date.now(),
+                    codigo,
+                    servicio,
+                    hospital,
+                    doctor,
+                    fechaHora,
+                    mes,
+                    obs
+                });
+
+                showToast('Habilitación de agenda registrada');
+            }
+
+            saveState();
+            renderAll();
+            closeGlobalModal();
+        }
+
+        // --- FUNCIONALIDAD DE EDICIÓN EN HISTORIALES ---
+        function openHistoryModal(type) {
+            const modal = document.getElementById('history-modal');
+            modal.dataset.historyType = type;
+            editingHistoryItem = null;
+            const title = document.getElementById('history-title');
+            const search = document.getElementById('history-search-input');
+            search.value = '';
+
+            const titles = {
+                'calls': 'Historial Completo de Llamadas y Solicitudes',
+                'assigned': 'Historial Completo de Turnos Asignados',
+                'habilitacion': 'Historial Completo de Habilitación de Agendas'
+            };
+            title.innerText = titles[type] || 'Historial';
+
+            filterHistory();
+            modal.classList.remove('hidden');
+        }
+
+        function closeHistoryModal() {
+            editingHistoryItem = null;
+            document.getElementById('history-modal').classList.add('hidden');
+        }
+
+        function startHistoryEdit(type, id) {
+            editingHistoryItem = { type, id };
+            filterHistory();
+            lucide.createIcons();
+        }
+
+        function cancelHistoryEdit() {
+            editingHistoryItem = null;
+            filterHistory();
+            lucide.createIcons();
+        }
+
+        function saveHistoryEditAssigned(id) {
+            const item = appState.assigned.find(a => a.id === id);
+            if (!item) return;
+
+            item.patient = (document.getElementById(`hist-ass-patient-${id}`)?.value || '').trim();
+            item.dni = (document.getElementById(`hist-ass-dni-${id}`)?.value || '').trim();
+            item.phone = (document.getElementById(`hist-ass-phone-${id}`)?.value || '').trim();
+            item.hospital = document.getElementById(`hist-ass-hosp-${id}`)?.value || item.hospital;
+            item.servicio = document.getElementById(`hist-ass-serv-${id}`)?.value || item.servicio;
+            item.doctor = (document.getElementById(`hist-ass-doc-${id}`)?.value || '').trim();
+            item.fechaHora = (document.getElementById(`hist-ass-fecha-${id}`)?.value || '').trim();
+
+            editingHistoryItem = null;
+            saveState();
+            filterHistory();
+            renderAll();
+            showToast('Turno en historial actualizado correctamente');
+        }
+
+        function saveHistoryEditHabilitacion(id) {
+            const item = appState.habilitacion.find(h => h.id === id);
+            if (!item) return;
+
+            item.servicio = document.getElementById(`hist-hab-serv-${id}`)?.value || item.servicio;
+            item.codigo = (document.getElementById(`hist-hab-code-${id}`)?.value || '').trim();
+            item.hospital = document.getElementById(`hist-hab-hosp-${id}`)?.value || item.hospital;
+            item.doctor = (document.getElementById(`hist-hab-doc-${id}`)?.value || '').trim();
+            item.fechaHora = (document.getElementById(`hist-hab-fecha-${id}`)?.value || '').trim();
+            item.mes = document.getElementById(`hist-hab-mes-${id}`)?.value || item.mes;
+            item.obs = (document.getElementById(`hist-hab-obs-${id}`)?.value || '').trim();
+
+            editingHistoryItem = null;
+            saveState();
+            filterHistory();
+            renderAll();
+            showToast('Habilitación en historial actualizada correctamente');
+        }
+
+        function filterHistory() {
+            const modal = document.getElementById('history-modal');
+            const type = modal.dataset.historyType;
+            const container = document.getElementById('history-content-list');
+            const query = (document.getElementById('history-search-input').value || '').toLowerCase();
+
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (type === 'timelogs') {
+                const list = (appState.timeLogs || []).filter(l => 
+                    l.type.toLowerCase().includes(query) || l.date.includes(query) || l.time.includes(query)
+                );
+                if (list.length === 0) {
+                    container.innerHTML = `<div class="p-6 text-center text-slate-400 italic">No hay registros de fichado.</div>`;
+                    return;
+                }
+                container.innerHTML = list.map(l => `
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between text-xs">
+                        <div class="font-bold text-slate-800">${l.type}</div>
+                        <div class="text-slate-500 font-semibold">${l.date} - ${l.time}</div>
+                    </div>
+                `).join('');
+                return;
+            }
+
+            if (type === 'notes') {
+                const list = (appState.dailyNotes || []).filter(n => n.text.toLowerCase().includes(query));
+                if (list.length === 0) {
+                    container.innerHTML = `<div class="p-6 text-center text-slate-400 italic">No hay notas guardadas en el historial.</div>`;
+                    return;
+                }
+                container.innerHTML = list.map(n => `
+                    <div class="p-3.5 bg-amber-50/60 border border-amber-200/60 rounded-2xl text-xs space-y-1">
+                        <div class="font-semibold text-slate-800">${n.text}</div>
+                        <div class="text-[10px] text-slate-400">${n.fechaHora}</div>
+                    </div>
+                `).join('');
+                return;
+            }
+
+            if (type === 'calls') {
+                const list = (appState.calls || []).filter(c => {
+                    const matchPhone = (c.phone || '').includes(query);
+                    const matchReqs = (c.requests || []).some(r => 
+                        (r.hospital || '').toLowerCase().includes(query) ||
+                        (r.servicios || []).some(s => {
+                            const name = typeof s === 'string' ? s : (s ? s.nombre : '');
+                            const doc = typeof s === 'object' ? (s.doctor || '') : '';
+                            return name.toLowerCase().includes(query) || doc.toLowerCase().includes(query);
+                        })
+                    );
+                    return matchPhone || matchReqs;
+                });
+
+                if (list.length === 0) {
+                    container.innerHTML = `<div class="p-6 text-center text-slate-400 italic">No se encontraron registros de llamadas.</div>`;
+                    return;
+                }
+
+                container.innerHTML = list.map(c => {
+                    const isEditing = editingCallId === c.id;
+                    if (isEditing) {
+                        return `
+                            <div class="p-4 bg-pink-50/40 border border-pink-200 rounded-3xl space-y-3 text-xs">
+                                <div class="flex items-center justify-between border-b border-pink-200 pb-2">
+                                    <span class="font-bold text-pink-700">Edición de Llamada #${c.id}</span>
+                                    <div class="flex gap-2">
+                                        <button onclick="cancelInlineEdit()" class="px-3 py-1 bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs">Cancelar</button>
+                                        <button onclick="saveInlineEdit(${c.id})" class="px-4 py-1 bg-pink-500 text-white font-semibold rounded-xl text-xs shadow-xs">Guardar</button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Teléfono</label>
+                                        <input type="text" id="inline-edit-phone-${c.id}" value="${c.phone || ''}" class="w-full px-3 py-1.5 text-xs bg-white border border-pink-200 rounded-xl font-bold">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Estado</label>
+                                        <select id="inline-edit-status-${c.id}" class="w-full px-3 py-1.5 text-xs bg-white border border-pink-200 rounded-xl">
+                                            <option value="Llamada en curso" ${c.status === 'Llamada en curso' ? 'selected' : ''}>🟡 Llamada en curso</option>
+                                            <option value="Finalizado" ${c.status === 'Finalizado' ? 'selected' : ''}>✅ Finalizado</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="inline-edit-requests-container-${c.id}" class="space-y-3">
+                                    ${(c.requests || []).map((r) => `
+                                        <div class="p-3 bg-white border border-pink-200 rounded-2xl space-y-2">
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Trámite</label>
+                                                    <select class="inline-req-tipo w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                                        <option value="Consulta" ${r.tipo === 'Consulta' ? 'selected' : ''}>Consulta</option>
+                                                        <option value="Estudio" ${r.tipo === 'Estudio' ? 'selected' : ''}>Estudio</option>
+                                                        <option value="Receta" ${r.tipo === 'Receta' ? 'selected' : ''}>Receta</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Grupo Etario</label>
+                                                    <select class="inline-req-grupo w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg font-bold">
+                                                        <option value="Adulto" ${r.grupoEtario === 'Adulto' ? 'selected' : ''}>👤 Adulto</option>
+                                                        <option value="Niño" ${r.grupoEtario === 'Niño' ? 'selected' : ''}>🧒 Niño</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-slate-500 uppercase">Hospital</label>
+                                                    <select class="inline-req-hospital w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                                        ${generateHospitalSelectOptions(r.hospital)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="space-y-1">
+                                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Servicios, Doctores y DNI</label>
+                                                ${(r.servicios || []).map((s) => {
+                                                    const sName = typeof s === 'object' ? s.nombre : s;
+                                                    const sDoc = typeof s === 'object' ? s.doctor : '';
+                                                    const sDni = typeof s === 'object' ? (s.dni || '') : '';
+                                                    return `
+                                                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                                                            <div class="sm:col-span-5">
+                                                                <select class="inline-serv-name w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                                                    ${generateServicioSelectOptions(sName)}
+                                                                </select>
+                                                            </div>
+                                                            <div class="sm:col-span-4">
+                                                                <input type="text" value="${sDoc}" placeholder="Dr. específico" class="inline-serv-doc w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                                            </div>
+                                                            <div class="sm:col-span-3">
+                                                                <input type="text" value="${sDni}" placeholder="DNI Paciente" class="inline-serv-dni w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                                            </div>
+                                                        </div>
+                                                    `;
+                                                }).join('')}
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Observaciones</label>
+                                                <input type="text" value="${r.obs || ''}" placeholder="Anotaciones..." class="inline-req-obs w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg">
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 text-xs hover:border-pink-200 transition">
+                            <div class="flex items-center justify-between font-bold text-slate-800 border-b border-slate-200 pb-2">
+                                <span class="text-pink-600 font-extrabold text-sm">${c.phone}</span>
+                                <div class="flex items-center gap-2">
+                                    <select onchange="updateHistoryCallStatus(${c.id}, this.value)" class="text-[11px] p-1 border rounded-lg font-semibold ${c.status === 'Finalizado' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'}">
+                                        <option value="Llamada en curso" ${c.status === 'Llamada en curso' ? 'selected' : ''}>🟡 Llamada en curso</option>
+                                        <option value="Finalizado" ${c.status === 'Finalizado' ? 'selected' : ''}>✅ Finalizado</option>
+                                    </select>
+                                    <span class="text-slate-400 text-[11px] font-normal">${c.fechaHora}</span>
+                                    <button onclick="triggerInlineEdit(${c.id})" class="px-2.5 py-1 bg-pink-50 text-pink-700 border border-pink-200 hover:bg-pink-100 rounded-xl font-bold flex items-center gap-1 transition text-[11px]">
+                                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Editar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                ${(c.requests || []).map(r => `
+                                    <div class="p-2.5 bg-white rounded-xl border border-slate-200 flex flex-wrap justify-between items-center text-[11px] gap-2">
+                                        <div>
+                                            <span class="font-bold text-slate-700">${r.tipo} (${r.grupoEtario})</span> - 
+                                            <span class="text-pink-600 font-bold">${(r.servicios || []).map(s => typeof s === 'string' ? s : s.nombre).join(', ')}</span>
+                                            ${(r.servicios || []).some(s => typeof s === 'object' && s.doctor) ? `<span class="text-slate-500 font-semibold"> [Doc: ${(r.servicios || []).map(s => s.doctor).filter(Boolean).join(', ')}]</span>` : ''}
+                                        </div>
+                                        <span class="font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200">${r.hospital}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                lucide.createIcons();
+                return;
+            }
+
+            if (type === 'assigned') {
+                const list = (appState.assigned || []).filter(a => 
+                    (a.patient || '').toLowerCase().includes(query) ||
+                    (a.hospital || '').toLowerCase().includes(query) ||
+                    (a.servicio || '').toLowerCase().includes(query) ||
+                    (a.doctor || '').toLowerCase().includes(query) ||
+                    (a.phone || '').includes(query) ||
+                    (a.dni || '').includes(query)
+                );
+
+                if (list.length === 0) {
+                    container.innerHTML = `<div class="p-6 text-center text-slate-400 italic">No hay turnos asignados en el historial.</div>`;
+                    return;
+                }
+
+                container.innerHTML = list.map(a => {
+                    const isEditing = editingHistoryItem && editingHistoryItem.type === 'assigned' && editingHistoryItem.id === a.id;
+                    if (isEditing) {
+                        return `
+                            <div class="p-4 bg-emerald-50/60 border border-emerald-300 rounded-2xl space-y-3 text-xs">
+                                <div class="flex items-center justify-between border-b border-emerald-200 pb-2">
+                                    <span class="font-bold text-emerald-800">Editando Turno Asignado</span>
+                                    <div class="flex gap-2">
+                                        <button onclick="cancelHistoryEdit()" class="px-3 py-1 bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs">Cancelar</button>
+                                        <button onclick="saveHistoryEditAssigned(${a.id})" class="px-4 py-1 bg-emerald-600 text-white font-semibold rounded-xl text-xs shadow-xs">Guardar</button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Paciente</label>
+                                        <input type="text" id="hist-ass-patient-${a.id}" value="${a.patient || ''}" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">DNI</label>
+                                        <input type="text" id="hist-ass-dni-${a.id}" value="${a.dni || ''}" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Teléfono</label>
+                                        <input type="text" id="hist-ass-phone-${a.id}" value="${a.phone || ''}" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Hospital</label>
+                                        <select id="hist-ass-hosp-${a.id}" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
+                                            ${generateHospitalSelectOptions(a.hospital)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Servicio</label>
+                                        <select id="hist-ass-serv-${a.id}" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
+                                            ${generateServicioSelectOptions(a.servicio)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Doctor</label>
+                                        <input type="text" id="hist-ass-doc-${a.id}" value="${a.doctor || ''}" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Fecha & Hora</label>
+                                        <input type="text" id="hist-ass-fecha-${a.id}" value="${a.fechaHora || ''}" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs">
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="p-4 bg-emerald-50/40 border border-emerald-100 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs hover:border-emerald-300 transition">
+                            <div>
+                                <span class="font-bold text-slate-800 text-sm">${a.patient || 'Sin nombre'}</span>
+                                <span class="text-slate-500 font-medium"> (Tel: ${a.phone || '-'}, DNI: ${a.dni || '-'})</span>
+                                <div class="text-xs text-emerald-800 font-bold mt-1">${a.hospital} - ${a.servicio} <span class="text-slate-600 font-medium">(${a.doctor || 'Dr. Sin especificar'})</span></div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] font-bold text-slate-600 bg-white px-2.5 py-1 rounded-xl border border-slate-200">${a.fechaHora}</span>
+                                <button onclick="startHistoryEdit('assigned', ${a.id})" class="px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 rounded-xl font-bold flex items-center gap-1 transition text-xs">
+                                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Editar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                lucide.createIcons();
+                return;
+            }
+
+            if (type === 'habilitacion') {
+                const list = (appState.habilitacion || []).filter(h => 
+                    (h.servicio || '').toLowerCase().includes(query) ||
+                    (h.hospital || '').toLowerCase().includes(query) ||
+                    (h.doctor || '').toLowerCase().includes(query) ||
+                    (h.codigo || '').toLowerCase().includes(query)
+                );
+
+                if (list.length === 0) {
+                    container.innerHTML = `<div class="p-6 text-center text-slate-400 italic">No hay habilitaciones en el historial.</div>`;
+                    return;
+                }
+
+                container.innerHTML = list.map(h => {
+                    const isEditing = editingHistoryItem && editingHistoryItem.type === 'habilitacion' && editingHistoryItem.id === h.id;
+                    if (isEditing) {
+                        return `
+                            <div class="p-4 bg-indigo-50/60 border border-indigo-300 rounded-2xl space-y-3 text-xs">
+                                <div class="flex items-center justify-between border-b border-indigo-200 pb-2">
+                                    <span class="font-bold text-indigo-800">Editando Habilitación de Agenda</span>
+                                    <div class="flex gap-2">
+                                        <button onclick="cancelHistoryEdit()" class="px-3 py-1 bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs">Cancelar</button>
+                                        <button onclick="saveHistoryEditHabilitacion(${h.id})" class="px-4 py-1 bg-indigo-600 text-white font-semibold rounded-xl text-xs shadow-xs">Guardar</button>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Servicio</label>
+                                        <select id="hist-hab-serv-${h.id}" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
+                                            ${generateServicioSelectOptions(h.servicio)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Código</label>
+                                        <input type="text" id="hist-hab-code-${h.id}" value="${h.codigo || ''}" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Hospital</label>
+                                        <select id="hist-hab-hosp-${h.id}" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold">
+                                            ${generateHospitalSelectOptions(h.hospital)}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Doctor</label>
+                                        <input type="text" id="hist-hab-doc-${h.id}" value="${h.doctor || ''}" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Fecha & Hora</label>
+                                        <input type="text" id="hist-hab-fecha-${h.id}" value="${h.fechaHora || ''}" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Mes</label>
+                                        <select id="hist-hab-mes-${h.id}" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-xl text-xs">
+                                            ${['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'].map(m => `<option value="${m}" ${m === h.mes ? 'selected' : ''}>${m}</option>`).join('')}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Observaciones</label>
+                                    <input type="text" id="hist-hab-obs-${h.id}" value="${h.obs || ''}" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs">
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="p-4 bg-indigo-50/40 border border-indigo-100 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs hover:border-indigo-300 transition">
+                            <div>
+                                <span class="font-bold text-slate-800 text-sm">${h.servicio} ${h.codigo ? `<span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-md font-bold">[${h.codigo}]</span>` : ''}</span>
+                                <div class="text-xs text-indigo-800 font-bold mt-1">${h.hospital} - Dr. ${h.doctor || 'Sin asignar'}</div>
+                                ${h.obs ? `<div class="text-[11px] text-slate-500 italic mt-0.5">📝 ${h.obs}</div>` : ''}
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <span class="text-xs font-bold text-slate-600 block">${h.fechaHora}</span>
+                                    <span class="text-[10px] text-indigo-600 font-bold uppercase">${h.mes}</span>
+                                </div>
+                                <button onclick="startHistoryEdit('habilitacion', ${h.id})" class="px-3 py-1 bg-indigo-50 text-indigo-800 border border-indigo-200 hover:bg-indigo-100 rounded-xl font-bold flex items-center gap-1 transition text-xs">
+                                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Editar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                lucide.createIcons();
+            }
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = 'bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-2 transition-all duration-300 transform translate-y-2 opacity-0';
+            toast.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Script para forzar mayúsculas automáticamente en tiempo real en todos los inputs y textareas
+        document.addEventListener('input', function(e) {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') && e.target.type !== 'hidden' && e.target.type !== 'date') {
+                const start = e.target.selectionStart;
+                const end = e.target.selectionEnd;
+                e.target.value = e.target.value.toUpperCase();
+                if (e.target.setSelectionRange) {
+                    e.target.setSelectionRange(start, end);
+                }
+            }
+        });
+
+        window.onload = function() {
+            loadState();
+            updateClock();
+            setInterval(updateClock, 1000);
+            renderAll();
+        };
+    </script>
+</body>
+</html>
